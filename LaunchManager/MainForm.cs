@@ -323,21 +323,29 @@ namespace LaunchManager
             grid.DragDrop += dataGridView1_DragDrop;
         }
 
+        
         private async void CheckForUpdates()
         {
             try
             {
-                string versionUrl = "https://raw.githubusercontent.com/DMP79IT/Launch-Manager-2024/refs/heads/main/version.json";
+                string assemblyInfoUrl =
+                    "https://raw.githubusercontent.com/DMP79IT/Launch-Manager-2024/main/LaunchManager/Properties/AssemblyInfo.cs";
 
                 using (var client = new HttpClient())
                 {
                     client.Timeout = TimeSpan.FromSeconds(8);
 
-                    string json = await client.GetStringAsync(versionUrl);
+                    string assemblyInfoText = await client.GetStringAsync(assemblyInfoUrl);
 
-                    var obj = JObject.Parse(json);
-                    string onlineVersionStr = (string)obj["version"];
-                    string onlineUrl = (string)obj["url"];
+                    // Cerca: [assembly: AssemblyFileVersion("1.3.1")]
+                    var match = Regex.Match(
+                        assemblyInfoText,
+                        @"AssemblyFileVersion\(""(?<ver>\d+\.\d+\.\d+)""\)");
+
+                    if (!match.Success)
+                        return;
+
+                    string onlineVersionStr = match.Groups["ver"].Value;
 
                     if (Version.TryParse(onlineVersionStr, out Version onlineVersion))
                     {
@@ -345,15 +353,15 @@ namespace LaunchManager
 
                         if (onlineVersion > current)
                         {
+                            string onlineUrl = "https://it.flightsim.to/file/100036/launch-manager-2024";
+
                             var result = CustomDialogs.ShowUpdateDialog(current, onlineVersion);
 
                             if (result == DialogResult.Yes)
                             {
                                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
                                 {
-                                    FileName = string.IsNullOrWhiteSpace(onlineUrl)
-                                        ? "https://it.flightsim.to/file/100036/launch-manager-2024"
-                                        : onlineUrl,
+                                    FileName = onlineUrl,
                                     UseShellExecute = true
                                 });
                             }
@@ -368,8 +376,10 @@ namespace LaunchManager
         }
 
 
-        // Comando per il clic veloce con il tasto destro
-        private void Grid_MouseDownForContextMenu(object sender, MouseEventArgs e)
+
+
+    // Comando per il clic veloce con il tasto destro
+    private void Grid_MouseDownForContextMenu(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
