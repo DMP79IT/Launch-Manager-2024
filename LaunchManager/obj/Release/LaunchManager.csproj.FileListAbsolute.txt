@@ -1,0 +1,15 @@
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Release\Launch Manager 2024.exe.config
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Release\Launch Manager 2024.exe
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Release\Launch Manager 2024.pdb
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Release\Newtonsoft.Json.xml
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Release\LaunchManager.csproj.AssemblyReference.cache
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Release\Interop.IWshRuntimeLibrary.dll
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Release\LaunchManager.csproj.ResolveComReference.cache
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Release\LaunchManager.Properties.Resources.resources
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Release\LaunchManager.csproj.GenerateResource.cache
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Release\LaunchManager.csproj.CoreCompileInputs.cache
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Release\LaunchManager.csproj.Fody.CopyLocal.cache
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Release\LaunchManager.csproj.Fody.RuntimeCopyLocal.cache
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Release\LaunchMa.ADF22EDD.Up2Date
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Release\Launch Manager 2024.exe
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Release\Launch Manager 2024.pdb
