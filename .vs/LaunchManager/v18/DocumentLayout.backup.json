@@ -16,9 +16,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{643B0960-7B1C-455C-9E53-6BBC57DB73CA}|LaunchManager\\LaunchManager.csproj|G:\\DOWNLOAD\\LAUNCH MANAGER 2024 IN SVILUPPO\\Launch Manager 2024\\launchmanager\\settingsform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{643B0960-7B1C-455C-9E53-6BBC57DB73CA}|LaunchManager\\LaunchManager.csproj|solutionrelative:launchmanager\\settingsform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{643B0960-7B1C-455C-9E53-6BBC57DB73CA}|LaunchManager\\LaunchManager.csproj|g:\\download\\launch manager 2024 in sviluppo\\launch manager 2024\\launchmanager\\||{B270807C-D8C6-49EB-8EBE-8E8D566637A1}|5e9a8ac2-4f34-4521-858f-4c248ba31532"
     }
   ],
   "DocumentGroupContainers": [
@@ -39,8 +36,7 @@
               "ToolTip": "G:\\DOWNLOAD\\LAUNCH MANAGER 2024 IN SVILUPPO\\Launch Manager 2024\\LaunchManager\\LaunchManager.csproj",
               "RelativeToolTip": "LaunchManager\\LaunchManager.csproj",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2025-12-22T01:37:01.995Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-22T01:37:01.995Z"
             },
             {
               "$type": "Document",
@@ -52,8 +48,7 @@
               "RelativeToolTip": "LaunchManager\\CustomDialogs.cs",
               "ViewState": "AgIAAIcBAAAAAAAAAAAYwK8BAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-12-21T22:45:05.208Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-12-21T22:45:05.208Z"
             },
             {
               "$type": "Document",
@@ -63,7 +58,7 @@
               "RelativeDocumentMoniker": "LaunchManager\\MainForm.cs",
               "ToolTip": "G:\\DOWNLOAD\\LAUNCH MANAGER 2024 IN SVILUPPO\\Launch Manager 2024\\LaunchManager\\MainForm.cs",
               "RelativeToolTip": "LaunchManager\\MainForm.cs",
-              "ViewState": "AgIAAA0BAAAAAAAAAAAuwHUBAABJAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAAlAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-12-08T19:01:15.493Z",
               "EditorCaption": ""

@@ -1,0 +1,17 @@
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Debug\Launch Manager 2024.exe.config
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Debug\Launch Manager 2024.exe
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Debug\Launch Manager 2024.pdb
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Debug\Newtonsoft.Json.xml
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Debug\LaunchManager.csproj.AssemblyReference.cache
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Debug\Interop.IWshRuntimeLibrary.dll
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Debug\LaunchManager.csproj.ResolveComReference.cache
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Debug\LaunchManager.Properties.Resources.resources
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Debug\LaunchManager.csproj.GenerateResource.cache
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Debug\LaunchManager.csproj.CoreCompileInputs.cache
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Debug\LaunchMa.ADF22EDD.Up2Date
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Debug\Launch Manager 2024.exe
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\obj\Debug\Launch Manager 2024.pdb
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Debug\Costura.dll
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Debug\Newtonsoft.Json.dll
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Debug\Costura.pdb
+G:\DOWNLOAD\LAUNCH MANAGER 2024 IN SVILUPPO\Launch Manager 2024\LaunchManager\bin\Debug\Costura.xml
