@@ -1,0 +1,49 @@
+name: Update version.json from tag
+
+on:
+  push:
+    tags:
+      - 'v*'   # es. v1.3.3
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write   # necessario per fare commit/push
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: get_version
+        run: |
+          # GITHUB_REF es: refs/tags/v1.3.3
+          TAG="${GITHUB_REF##*/}"
+          VERSION="${TAG#v}"   # rimuove la 'v' iniziale
+          echo "VERSION=$VERSION"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update version.json
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+          echo "Using version: $VERSION"
+
+          # Aggiorna solo il campo "version" mantenendo la struttura
+          tmp_file=$(mktemp)
+          jq --arg ver "$VERSION" '.version = $ver' version.json > "$tmp_file"
+          mv "$tmp_file" version.json
+
+          cat version.json
+
+      - name: Commit and push changes
+        run: |
+          VERSION="${{ steps.get_version.outputs.version }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add version.json
+          git commit -m "Update version.json to $VERSION" || echo "No changes to commit"
+          git push origin HEAD:main
