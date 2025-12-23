@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
 using System.Windows.Forms;
 
@@ -154,7 +153,7 @@ namespace LaunchManager
             {
                 if (string.IsNullOrWhiteSpace(AppPath) || !File.Exists(AppPath))
                 {
-                    MessageBox.Show("Select a valid executable file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    CustomDialogs.ShowError("Select a valid executable file.", "Error");
                     return;
                 }
                 DialogResult = DialogResult.OK;

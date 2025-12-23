@@ -173,4 +173,8 @@
     <Error Condition="!Exists('..\packages\Costura.Fody.6.0.0\build\Costura.Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Costura.Fody.6.0.0\build\Costura.Fody.targets'))" />
   </Target>
   <Import Project="..\packages\Costura.Fody.6.0.0\build\Costura.Fody.targets" Condition="Exists('..\packages\Costura.Fody.6.0.0\build\Costura.Fody.targets')" />
+  <PropertyGroup>
+    <PostBuildEvent>cmd /k ""$(SolutionDir)UpdateLM_Auto.bat" "$(Configuration)""
+</PostBuildEvent>
+  </PropertyGroup>
 </Project>

@@ -1,5 +1,4 @@
 ﻿using LaunchManager.Controls;
-using LaunchManager.Services;
 using System;
 using System.Drawing;
 using System.IO;
@@ -115,14 +114,12 @@ namespace LaunchManager
                     }
                     else
                     {
-                        MessageBox.Show("The config.xml file was not found.",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        CustomDialogs.ShowError("The config.xml file was not found.", "Launch Manager 2024");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error opening config.xml:\n" + ex.Message,
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError("Error opening config.xml:\n" + ex.Message, "Launch Manager 2024");
                 }
             };
             Controls.Add(btnOpenConfig);
@@ -151,14 +148,12 @@ namespace LaunchManager
                     }
                     else
                     {
-                        MessageBox.Show("The folder does not exist:\n" + appDataPath,
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        CustomDialogs.ShowError("The folder does not exist:\n" + appDataPath, "Launch Manager 2024");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error opening folder:\n" + ex.Message,
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError("Error opening folder:\n" + ex.Message, "Launch Manager 2024");
                 }
             };
             Controls.Add(btnOpenAppData);
@@ -177,8 +172,7 @@ namespace LaunchManager
 
                 if (string.IsNullOrWhiteSpace(ExeXmlPath))
                 {
-                    MessageBox.Show("Please enter a valid path to exe.xml.",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    CustomDialogs.ShowError("Please enter a valid path to exe.xml.", "Launch Manager 2024");
                     return;
                 }
 
@@ -200,39 +194,55 @@ namespace LaunchManager
                     xml.Load(configPath);
                     var rootNode = xml.SelectSingleNode("/Config") ?? xml.AppendChild(xml.CreateElement("Config"));
 
-                    // Aggiorna solo il path exe.xml salvato in config.xml
-                    var oldNode = rootNode.SelectSingleNode("ExeXmlPath");
-                    if (oldNode != null) rootNode.RemoveChild(oldNode);
+                    // ✅ LEGGI PATH ORIGINALE
+                    string originalPath = null;
+                    var originalNode = rootNode.SelectSingleNode("ExeXmlPath");
+                    if (originalNode != null)
+                        originalPath = originalNode.InnerText;
 
+                    // ✅ LEGGI TEMA ORIGINALE
+                    string originalTheme = null;
+                    var originalThemeNode = rootNode.SelectSingleNode("Theme");
+                    if (originalThemeNode != null)
+                        originalTheme = originalThemeNode.InnerText;
+
+                    // SALVA PATH
+                    if (originalNode != null) rootNode.RemoveChild(originalNode);
                     var exeNode = xml.CreateElement("ExeXmlPath");
                     exeNode.InnerText = ExeXmlPath;
                     rootNode.AppendChild(exeNode);
 
+                    // SALVA TEMA
+                    string selectedTheme = cmbTheme.SelectedItem.ToString();
+                    if (originalThemeNode != null) rootNode.RemoveChild(originalThemeNode);
+                    var themeNode = xml.CreateElement("Theme");
+                    themeNode.InnerText = selectedTheme;
+                    rootNode.AppendChild(themeNode);
+
                     xml.Save(configPath);
 
-                    // Aggiorna il percorso in memoria subito dopo il salvataggio
+                    // Aggiorna in memoria
                     Paths.ExeXmlPath = ExeXmlPath;
-
-                    MessageBox.Show(
-                        $"Saved new exe.xml path to config:\n{configPath}",
-                        "Launch Manager 2024",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information
-                    );
-
-                    ThemeManager.CurrentTheme =
-                    cmbTheme.SelectedItem.ToString() == "Dark"
-                    ? ThemeManager.ThemeMode.Dark
-                    : ThemeManager.ThemeMode.Light;
-
+                    ThemeManager.CurrentTheme = selectedTheme == "Dark" ? ThemeManager.ThemeMode.Dark : ThemeManager.ThemeMode.Light;
                     ThemeManager.SaveTheme();
+
+                    // ✅ MESSAGGI SOLO SE CAMBIATI
+                    if (!string.Equals(ExeXmlPath, originalPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        CustomDialogs.ShowInfo($"Saved new exe.xml path to config:\n{configPath}", "Launch Manager 2024");
+                    }
+
+                    if (!string.Equals(selectedTheme, originalTheme, StringComparison.OrdinalIgnoreCase))
+                    {
+                        CustomDialogs.ShowInfo($"Theme changed to {selectedTheme}.", "Launch Manager 2024");
+                    }
+
                     DialogResult = DialogResult.OK;
                     Close();
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error saving configuration:\n" + ex.Message,
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError("Error saving configuration:\n" + ex.Message, "Launch Manager 2024");
                 }
             };
 

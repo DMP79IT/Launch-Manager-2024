@@ -162,7 +162,7 @@ namespace LaunchManager
             {
                 if (string.IsNullOrWhiteSpace(AppPath) || !File.Exists(AppPath))
                 {
-                    MessageBox.Show("Select a valid executable file.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    CustomDialogs.ShowError("Select a valid executable file.", "Error");
                     return;
                 }
 

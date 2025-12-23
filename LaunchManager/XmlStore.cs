@@ -2,8 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Xml.Linq;
 using System.Xml.Serialization;
 
 namespace LaunchManager.Services
@@ -36,7 +34,7 @@ namespace LaunchManager.Services
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show("Errore nel caricamento XML: " + ex.Message);
+                CustomDialogs.ShowError("Error loading XML: " + ex.Message, "Launch Manager 2024");
                 return new List<AppEntry>();
             }
         }
@@ -63,7 +61,7 @@ namespace LaunchManager.Services
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show("Errore nel salvataggio XML: " + ex.Message);
+                CustomDialogs.ShowError("Error saving XML: " + ex.Message, "Launch Manager 2024");
             }
         }
 
@@ -86,7 +84,7 @@ namespace LaunchManager.Services
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show("Errore nel backup: " + ex.Message);
+                CustomDialogs.ShowError("Error in backup: " + ex.Message, "Launch Manager 2024");
             }
         }
     }

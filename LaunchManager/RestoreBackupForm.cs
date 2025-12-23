@@ -1,9 +1,8 @@
-﻿using System;
+﻿using LaunchManager.Controls;
+using System;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
-using LaunchManager.Controls;
-using LaunchManager.Services;
 
 namespace LaunchManager
 {
@@ -80,8 +79,7 @@ namespace LaunchManager
 
                 if (!Directory.Exists(backupDir))
                 {
-                    MessageBox.Show("The backup folder does not exist.", "Error",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError("The backup folder does not exist.", "Launch Manager 2024");
                     return;
                 }
 
@@ -98,13 +96,11 @@ namespace LaunchManager
                 if (cmbBackups.Items.Count > 0)
                     cmbBackups.SelectedIndex = 0;
                 else
-                    MessageBox.Show("No backup available in the folder:\n" + backupDir,
-                        "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    CustomDialogs.ShowInfo($"No backup available in the folder:\n{backupDir}", "Launch Manager 2024");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading backups: " + ex.Message,
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CustomDialogs.ShowError("Error loading backups: " + ex.Message, "Launch Manager 2024");
             }
         }
 
@@ -112,16 +108,14 @@ namespace LaunchManager
         {
             if (cmbBackups.SelectedItem == null)
             {
-                MessageBox.Show("Please select a backup before proceeding..",
-                    "Attention", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                CustomDialogs.ShowError("Please select a backup before proceeding.", "Launch Manager 2024");
                 return;
             }
 
             string selectedFile = Path.Combine(Paths.GetBackupPath(), cmbBackups.SelectedItem.ToString());
             if (!File.Exists(selectedFile))
             {
-                MessageBox.Show("The selected file no longer exists.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CustomDialogs.ShowError("The selected file no longer exists.", "Launch Manager 2024");
                 return;
             }
 

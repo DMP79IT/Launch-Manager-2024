@@ -38,12 +38,7 @@ namespace LaunchManager
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Errore durante l'estrazione di LM.exe:\n{ex.Message}",
-                    "Launch Manager 2024",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
+                CustomDialogs.ShowError($"Error extracting LM.exe:\n{ex.Message}", "Launch Manager 2024");
             }
 
             // === 2️⃣ Avvia l'applicazione normale ===

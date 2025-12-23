@@ -7,11 +7,11 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml;
-using System.Net.Http;
-using System.Text.RegularExpressions;
-using System.Reflection;
 
 
 
@@ -322,7 +322,7 @@ namespace LaunchManager
             grid.DragDrop += dataGridView1_DragDrop;
         }
 
-        
+
         private async void CheckForUpdates()
         {
             try
@@ -377,8 +377,8 @@ namespace LaunchManager
 
 
 
-    // Comando per il clic veloce con il tasto destro
-    private void Grid_MouseDownForContextMenu(object sender, MouseEventArgs e)
+        // Comando per il clic veloce con il tasto destro
+        private void Grid_MouseDownForContextMenu(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Right)
             {
@@ -466,13 +466,13 @@ namespace LaunchManager
                     }
                     else
                     {
-                        MessageBox.Show($"Embedded icon not found: {resourcePath}");
+                        CustomDialogs.ShowError($"Embedded icon not found:\n{resourcePath}", "Launch Manager 2024");
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading icon {fileName}: {ex.Message}");
+                CustomDialogs.ShowError($"Error loading icon {fileName}:\n{ex.Message}", "Launch Manager 2024");
             }
 
             return SystemIcons.Application.ToBitmap();
@@ -601,6 +601,7 @@ namespace LaunchManager
                 ShowAlways = true
             };
 
+
             // =======================
             // === SEZIONE PROFILI ===
             // =======================
@@ -638,8 +639,7 @@ namespace LaunchManager
                             string profilePath = Path.Combine(baseDir, $"{nuovoProfilo}.xml");
                             if (File.Exists(profilePath))
                             {
-                                MessageBox.Show($"There is already a profile called \"{nuovoProfilo}\" for {sim}.",
-                                    "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                                CustomDialogs.ShowError($"There is already a profile called \"{nuovoProfilo}\" for {sim}.", "Launch Manager 2024");
                                 return;
                             }
 
@@ -659,12 +659,7 @@ namespace LaunchManager
                             // Aggiorna la combo profili
                             LoadProfiles();
 
-                            MessageBox.Show(
-                                $"Profile \"{nuovoProfilo}\" created for {sim} in:\n{profilePath}",
-                                "Launch Manager 2024",
-                                MessageBoxButtons.OK,
-                                MessageBoxIcon.Information
-                            );
+                            CustomDialogs.ShowInfo($"Profile \"{nuovoProfilo}\" created for {sim} in:\n{profilePath}", "Launch Manager 2024");
                         }
                     }
                 }
@@ -686,7 +681,7 @@ namespace LaunchManager
                 {
                     if (cmbProfiles.SelectedItem == null)
                     {
-                        MessageBox.Show("First select a profile to rename", "Launch Manager 2024");
+                        CustomDialogs.ShowError("First select a profile to rename", "Launch Manager 2024");
                         return;
                     }
 
@@ -702,7 +697,7 @@ namespace LaunchManager
                     string oldPath = Path.Combine(profilesDir, $"{oldName}.xml");
                     if (!File.Exists(oldPath))
                     {
-                        MessageBox.Show("The profile file no longer exists", "Error");
+                        CustomDialogs.ShowError("The profile file no longer exists", "Launch Manager 2024");
                         return;
                     }
 
@@ -720,7 +715,7 @@ namespace LaunchManager
 
                     if (File.Exists(newPath))
                     {
-                        MessageBox.Show("There is already a profile with this name", "Error");
+                        CustomDialogs.ShowError("There is already a profile with this name", "Launch Manager 2024");
                         return;
                     }
 
@@ -732,11 +727,11 @@ namespace LaunchManager
                     cmbProfiles.Items[index] = newName;
                     cmbProfiles.SelectedIndex = index;
 
-                    MessageBox.Show($"Profile renamed \"{newName}\"", "Launch Manager 2024");
+                    CustomDialogs.ShowInfo($"Profile renamed \"{newName}\"", "Launch Manager 2024");
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error while renaming profile: " + ex.Message, "Error");
+                    CustomDialogs.ShowError($"Error while renaming profile:\n{ex.Message}", "Launch Manager 2024");
                 }
             };
 
@@ -755,7 +750,7 @@ namespace LaunchManager
             {
                 if (grid.Rows.Count == 0)
                 {
-                    MessageBox.Show("There are no applications to save.");
+                    CustomDialogs.ShowError("There are no applications to save.", "Launch Manager 2024");
                     return;
                 }
 
@@ -774,7 +769,7 @@ namespace LaunchManager
                         profileName = form.ProfileName?.Trim();
                         if (string.IsNullOrEmpty(profileName))
                         {
-                            MessageBox.Show("Invalid profile name.");
+                            CustomDialogs.ShowError("Invalid profile name.", "Launch Manager 2024");
                             return;
                         }
 
@@ -789,16 +784,16 @@ namespace LaunchManager
 
                         if (File.Exists(profilePath))
                         {
-                            MessageBox.Show($"There is already a profile called \"{profileName}\" for {sim}.");
+                            CustomDialogs.ShowError($"There is already a profile called \"{profileName}\" for {sim}.", "Launch Manager 2024");
                             return;
                         }
 
                         // --- crea file xml base ---
                         string xmlContent =
-            @"<?xml version=""1.0"" encoding=""utf-8""?>
-<ArrayOfPrograms_CL xmlns:xsd=""http://www.w3.org/2001/XMLSchema""
-xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
-</ArrayOfPrograms_CL>";
+                        @"<?xml version=""1.0"" encoding=""utf-8""?>
+                        <ArrayOfPrograms_CL xmlns:xsd=""http://www.w3.org/2001/XMLSchema""
+                        xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+                        </ArrayOfPrograms_CL>";
                         File.WriteAllText(profilePath, xmlContent);
 
                         // --- aggiorna combo ---
@@ -810,7 +805,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                         _suppressProfileChange = false;
 
-                        MessageBox.Show($"Profile \"{profileName}\" created for {sim}.");
+                        CustomDialogs.ShowInfo($"Profile \"{profileName}\" created for {sim}.", "Launch Manager 2024");
                     }
                 }
 
@@ -855,7 +850,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 string profilePathFinal = Path.Combine(profilesDirFinal, profileName + ".xml");
                 XmlStore.SavePrograms(appList, profilePathFinal);
 
-                MessageBox.Show($"Profile \"{profileName}\" successfully saved.");
+                CustomDialogs.ShowInfo($"Profile \"{profileName}\" successfully saved.", "Launch Manager 2024");
 
                 // 🔹 5️⃣ Ricarica (sincronizzazione)
                 if (File.Exists(profilePathFinal))
@@ -879,7 +874,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show("Error while reloading profile:\n" + ex.Message);
+                        CustomDialogs.ShowError($"Error while reloading profile:\n{ex.Message}", "Launch Manager 2024");
                     }
                 }
             };
@@ -901,7 +896,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 {
                     if (cmbProfiles.SelectedItem == null)
                     {
-                        MessageBox.Show("Select a profile to delete", "Launch Manager 2024");
+                        CustomDialogs.ShowError("Select a profile to delete", "Launch Manager 2024");
                         return;
                     }
 
@@ -918,7 +913,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                     if (!File.Exists(profilePath))
                     {
-                        MessageBox.Show("The profile file no longer exists or has already been removed", "Launch Manager 2024");
+                        CustomDialogs.ShowError("The profile file no longer exists or has already been removed", "Launch Manager 2024");
                         LoadProfiles();
                         return;
                     }
@@ -940,22 +935,12 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                         // Aggiorna la combo profili
                         LoadProfiles();
 
-                        MessageBox.Show(
-                            $"Profile \"{profileName}\" successfully deleted.",
-                            "Launch Manager 2024",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information
-                        );
+                        CustomDialogs.ShowInfo($"Profile \"{profileName}\" successfully deleted.", "Launch Manager 2024");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(
-                        "Error deleting profile: " + ex.Message,
-                        "Error",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error
-                    );
+                    CustomDialogs.ShowError($"Error deleting profile:\n{ex.Message}", "Launch Manager 2024");
 
                 }
             };
@@ -993,7 +978,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
             {
                 if (cmbProfiles.SelectedItem == null)
                 {
-                    MessageBox.Show("Select a profile to apply", "Launch Manager 2024");
+                    CustomDialogs.ShowError("Select a profile to apply", "Launch Manager 2024");
                     return;
                 }
 
@@ -1012,7 +997,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                 if (!File.Exists(profilePath))
                 {
-                    MessageBox.Show("The selected profile does not exist", "Error");
+                    CustomDialogs.ShowError("The selected profile does not exist", "Launch Manager 2024");
                     return;
                 }
 
@@ -1121,14 +1106,11 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                     // 5️⃣ Salva il nuovo exe.xml
                     xml.Save(exeXmlPath);
 
-                    MessageBox.Show(
-                        $"Profile '{selectedProfile}' successfully applied.\nBackup saved in:\n{backupFile}",
-                        "Launch Manager 2024"
-                    );
+                    CustomDialogs.ShowInfo($"Profile '{selectedProfile}' successfully applied.\nBackup saved in:\n{backupFile}", "Launch Manager 2024");
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error applying profile: " + ex.Message);
+                    CustomDialogs.ShowError($"Error applying profile:\n{ex.Message}", "Launch Manager 2024");
                 }
             };
 
@@ -1151,8 +1133,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                     string profileName = cmbProfiles.SelectedItem?.ToString();
                     if (string.IsNullOrWhiteSpace(profileName))
                     {
-                        MessageBox.Show("Select a profile before opening the XML file.",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        CustomDialogs.ShowInfo("Select a profile before opening the XML file.", "Launch Manager 2024");
                         return;
                     }
 
@@ -1164,8 +1145,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                     if (!File.Exists(profilePath))
                     {
-                        MessageBox.Show($"The profile file \"{profileName}\" does not exist:\n{profilePath}",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        CustomDialogs.ShowError($"The profile file \"{profileName}\" does not exist:\n{profilePath}", "Launch Manager 2024");
                         return;
                     }
 
@@ -1178,8 +1158,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error opening profile file:\n" + ex.Message,
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError($"Error opening profile file:\n{ex.Message}", "Launch Manager 2024");
                 }
             };
 
@@ -1207,8 +1186,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 {
                     if (!Directory.Exists(profileDir))
                     {
-                        MessageBox.Show($"Profile folder not found:\n{profileDir}",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        CustomDialogs.ShowInfo($"Profile folder not found:\n{profileDir}", "Launch Manager 2024");
                         return;
                     }
 
@@ -1217,8 +1195,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error opening profile folder:\n{ex.Message}",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError($"Error opening profile folder:\n{ex.Message}", "Launch Manager 2024");
                 }
             };
 
@@ -1322,9 +1299,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(
-                        "Error opening settings window:\n" + ex.Message,
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError($"Error opening settings window:\n{ex.Message}", "Launch Manager 2024");
                 }
             };
 
@@ -1343,8 +1318,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
             btnSave.Click += (s, e) =>
             {
                 SaveCompleteConfiguration();
-                MessageBox.Show("Configuration saved manually.",
-                    "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                CustomDialogs.ShowInfo("Configuration saved manually.", "Launch Manager 2024");
             };
 
 
@@ -1379,8 +1353,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                 if (!Directory.Exists(backupDir))
                 {
-                    MessageBox.Show($"Backup folder not found:\n{backupDir}",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    CustomDialogs.ShowInfo($"Backup folder not found:\n{backupDir}", "Launch Manager 2024");
                     return;
                 }
 
@@ -1396,13 +1369,11 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                         foreach (var file in Directory.GetFiles(backupDir))
                             File.Delete(file);
 
-                        MessageBox.Show("Backup folder successfully cleaned.", "Launch Manager 2024",
-                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        CustomDialogs.ShowInfo("Backup folder successfully cleaned.", "Launch Manager 2024");
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error while cleaning folder:\n{ex.Message}",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        CustomDialogs.ShowError($"Error while cleaning folder:\n{ex.Message}", "Launch Manager 2024");
                     }
                 }
             };
@@ -1433,8 +1404,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 {
                     if (!Directory.Exists(backupDir))
                     {
-                        MessageBox.Show($"Backup folder not found:\n{backupDir}",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        CustomDialogs.ShowInfo($"Backup folder not found:\n{backupDir}", "Launch Manager 2024");
                         return;
                     }
 
@@ -1442,8 +1412,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error opening backup folder:\n{ex.Message}",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError($"Error opening backup folder:\n{ex.Message}", "Launch Manager 2024");
                 }
             };
 
@@ -1472,21 +1441,18 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                             if (!File.Exists(backupFile))
                             {
-                                MessageBox.Show("The selected backup file does not exist.",
-                                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                CustomDialogs.ShowError("The selected backup file does not exist.", "Launch Manager 2024");
                                 return;
                             }
 
                             // Sostituisce direttamente il file exe.xml del simulatore
                             File.Copy(backupFile, targetFile, true);
 
-                            MessageBox.Show($"The simulator exe.xml file has been successfully restored from:\n\n{backupFile}",
-                                "Restore completed", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            CustomDialogs.ShowInfo($"The simulator exe.xml file has been successfully restored from:\n\n{backupFile}", "Launch Manager 2024");
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show("Error during restore: " + ex.Message,
-                                "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            CustomDialogs.ShowError($"Error during restore:\n{ex.Message}", "Launch Manager 2024");
                         }
                     }
                     else
@@ -1519,7 +1485,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                     if (!File.Exists(exeXmlPath))
                     {
-                        MessageBox.Show($"The {sim} exe.xml file was not found.", "Error");
+                        CustomDialogs.ShowError($"The {sim} exe.xml file was not found.", "Launch Manager 2024");
                         return;
                     }
 
@@ -1543,16 +1509,11 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                     // Copia file
                     File.Copy(exeXmlPath, backupFile, true);
 
-                    MessageBox.Show(
-                        $"Backup created successfully!\n\nPath:\n{backupFile}",
-                        "Launch Manager 2024",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Information
-                    );
+                    CustomDialogs.ShowInfo($"Backup created successfully!\n\nPath:\n{backupFile}", "Launch Manager 2024");
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error creating backup: " + ex.Message);
+                    CustomDialogs.ShowError($"Error creating backup:\n{ex.Message}", "Launch Manager 2024");
                 }
             };
 
@@ -1581,8 +1542,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
             {
                 if (grid.SelectedRows.Count == 0)
                 {
-                    MessageBox.Show("Select an application whose folder to open.",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    CustomDialogs.ShowInfo("Select an application whose folder to open.", "Launch Manager 2024");
                     return;
                 }
 
@@ -1593,8 +1553,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                     if (string.IsNullOrWhiteSpace(appPath))
                     {
-                        MessageBox.Show("Invalid or empty path.",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        CustomDialogs.ShowError("Invalid or empty path.", "Launch Manager 2024");
                         return;
                     }
 
@@ -1625,8 +1584,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                         }
                         catch (Exception ex)
                         {
-                            MessageBox.Show("Unable to resolve connection:\n" + ex.Message,
-                                "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                            CustomDialogs.ShowError($"Unable to resolve connection:\n{ex.Message}", "Launch Manager 2024");
                         }
                     }
 
@@ -1638,14 +1596,12 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                     }
                     else
                     {
-                        MessageBox.Show("Folder not found or inaccessible.",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        CustomDialogs.ShowError("Folder not found or inaccessible.", "Launch Manager 2024");
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error opening folder:\n" + ex.Message,
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError($"Error opening folder:\n{ex.Message}", "Launch Manager 2024");
                 }
             };
 
@@ -1664,8 +1620,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
             {
                 if (grid.SelectedRows.Count == 0)
                 {
-                    MessageBox.Show("Select an app to launch.", "Launch Manager 2024",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    CustomDialogs.ShowInfo("Select an app to launch.", "Launch Manager 2024");
                     return;
                 }
 
@@ -1675,8 +1630,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                 if (string.IsNullOrWhiteSpace(appPath))
                 {
-                    MessageBox.Show("No valid path specified.", "Launch Manager 2024",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    CustomDialogs.ShowError("No valid path specified.", "Launch Manager 2024");
                     return;
                 }
 
@@ -1685,8 +1639,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                 if (!File.Exists(resolvedPath))
                 {
-                    MessageBox.Show($"File not found:\n{resolvedPath}", "Launch Manager 2024",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError($"File not found:\n{resolvedPath}", "Launch Manager 2024");
                     return;
                 }
 
@@ -1704,8 +1657,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error starting app:\n{ex.Message}",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError($"Error starting app:\n{ex.Message}", "Launch Manager 2024");
                 }
             };
 
@@ -1751,8 +1703,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
             {
                 if (grid.SelectedRows.Count == 0)
                 {
-                    MessageBox.Show("Remove selected app.",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    CustomDialogs.ShowInfo("Remove selected app.", "Launch Manager 2024");
                     return;
                 }
 
@@ -1772,7 +1723,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                         grid.Rows.Remove(row);
                 }
 
-                AggiornaContatori(); 
+                AggiornaContatori();
                 AutoSaveCurrentProfile();
             };
 
@@ -1792,8 +1743,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
             {
                 if (grid.SelectedRows.Count == 0)
                 {
-                    MessageBox.Show("Select an app to edit.",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    CustomDialogs.ShowInfo("Select an app to edit.", "Launch Manager 2024");
                     return;
                 }
 
@@ -1801,8 +1751,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 var app = row.Tag as AppEntry;
                 if (app == null)
                 {
-                    MessageBox.Show("Unable to read data from the selected app.",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    CustomDialogs.ShowError("Unable to read data from the selected app.", "Launch Manager 2024");
                     return;
                 }
 
@@ -1891,7 +1840,8 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                         // 🔹 Auto‑save current profile
                         AutoSaveCurrentProfile();
-                    };
+                    }
+                    ;
                 }
             };
 
@@ -2207,10 +2157,9 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error while adding apps from drag & drop:\n" + ex.Message,
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError($"Error while adding apps from drag & drop:\n{ex.Message}", "Launch Manager 2024");
                 }
-                
+
                 // 🔹 Salvataggio nascosto
                 AutoSaveCurrentProfile();
             };
@@ -2322,13 +2271,11 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                     if (Directory.Exists(profileDir))
                         Process.Start("explorer.exe", profileDir);
                     else
-                        MessageBox.Show($"Profile folder not found:\n{profileDir}",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        CustomDialogs.ShowInfo($"Profile folder not found:\n{profileDir}", "Launch Manager 2024");
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error opening profile folder:\n{ex.Message}",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError($"Error opening profile folder:\n{ex.Message}", "Launch Manager 2024");
                 }
             });
 
@@ -2346,13 +2293,11 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                     if (Directory.Exists(backupDir))
                         Process.Start("explorer.exe", backupDir);
                     else
-                        MessageBox.Show($"Backup folder not found:\n{backupDir}",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        CustomDialogs.ShowInfo($"Backup folder not found:\n{backupDir}", "Launch Manager 2024");
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Error opening backup folder:\n{ex.Message}",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    CustomDialogs.ShowError($"Error opening backup folder:\n{ex.Message}", "Launch Manager 2024");
                 }
             });
 
@@ -2367,26 +2312,22 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
 
                 if (!Directory.Exists(backupDir))
                 {
-                    MessageBox.Show($"Backup folder not found:\n{backupDir}",
-                        "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    CustomDialogs.ShowInfo($"Backup folder not found:\n{backupDir}", "Launch Manager 2024");
                     return;
                 }
 
-                if (MessageBox.Show("Do you want to delete all files in the Backup folder?",
-                    "Confirm Cleanup", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                if (CustomDialogs.ShowQuestion("Do you want to delete all files in the Backup folder?", "Launch Manager 2024") == DialogResult.Yes)
                 {
                     try
                     {
                         foreach (var file in Directory.GetFiles(backupDir))
                             File.Delete(file);
 
-                        MessageBox.Show("Backup folder cleaned successfully!",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        CustomDialogs.ShowInfo("Backup folder cleaned successfully!", "Launch Manager 2024");
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show($"Error cleaning backup folder:\n{ex.Message}",
-                            "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        CustomDialogs.ShowError($"Error cleaning backup folder:\n{ex.Message}", "Launch Manager 2024");
                     }
                 }
             });
@@ -2698,8 +2639,7 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error loading XML profile: " + ex.Message,
-                    "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CustomDialogs.ShowError($"Error loading XML profile:\n{ex.Message}", "Launch Manager 2024");
             }
         }
 
@@ -2773,17 +2713,11 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
                 // 🔹 Salva i programmi nel file XML del profilo
                 XmlStore.SavePrograms(appList, profilePath); // ✅ qui ora salvi la lista corretta
 
-                MessageBox.Show(
-                    $"Configuration saved in profile:\n{profilePath}",
-                    "Launch Manager 2024",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
+                CustomDialogs.ShowInfo($"Configuration saved in profile:\n{profilePath}", "Launch Manager 2024");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error saving profile: " + ex.Message,
-                    "Launch Manager 2024", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                CustomDialogs.ShowError("Error saving profile: " + ex.Message, "Launch Manager 2024");
             }
         }
 
@@ -2939,10 +2873,10 @@ xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
             }
             return exeApps;
         }
- 
+
 
         // Codice x il salvataggio nascosto
-        
+
         private void AutoSaveCurrentProfile()
         {
             string profileName = cmbProfiles.SelectedItem?.ToString();

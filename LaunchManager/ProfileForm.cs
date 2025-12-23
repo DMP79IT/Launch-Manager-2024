@@ -1,5 +1,4 @@
-﻿using System;
-using System.Drawing;
+﻿using System.Drawing;
 using System.Windows.Forms;
 
 namespace LaunchManager
@@ -69,8 +68,7 @@ namespace LaunchManager
                 ProfileName = txtProfileName.Text.Trim();
                 if (string.IsNullOrEmpty(ProfileName))
                 {
-                    MessageBox.Show("Please enter a valid profile name.", "Warning",
-                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    CustomDialogs.ShowError("Please enter a valid profile name.", "Launch Manager 2024");
                     DialogResult = DialogResult.None;
                 }
             };
