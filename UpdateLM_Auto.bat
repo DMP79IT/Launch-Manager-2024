@@ -68,17 +68,21 @@ REM 4) Commit automatico
 git commit -m "!COMMIT_MSG!"
 
 REM 5) Crea il tag se non esiste
-git tag --list "!TAGNAME!" >nul
-if %errorlevel%==0 (
-    echo Il tag !TAGNAME! esiste gia'.
-) else (
+set "FOUND_TAG="
+for /f "tokens=1" %%T in ('git tag --list "!TAGNAME!"') do (
+    set "FOUND_TAG=%%T"
+)
+
+if "!FOUND_TAG!"=="" (
     echo Creo il tag !TAGNAME!...
     git tag "!TAGNAME!"
+) else (
+    echo Il tag !TAGNAME! esiste gia'.
 )
 
 REM 6) Push branch + tag
 git push origin main
-git push origin "!TAGNAME!"
+git push origin --tags
 
 echo Fatto.
 pause

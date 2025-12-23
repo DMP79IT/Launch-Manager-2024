@@ -103,7 +103,7 @@ namespace LaunchManager
 
                     string Normalize(string name) => (name ?? "").Trim();
 
-                    // 1. Apps present in EXE but NOT in PROFILE
+                    // 1. Applicazioni presenti in EXE ma non nel PROFILO
                     var extraInExe = exeApps
                         .Where(e => !profileApps.Any(p =>
                             Normalize(p.Name).Equals(Normalize(e.Name), StringComparison.OrdinalIgnoreCase)))
