@@ -1,6 +1,8 @@
 ﻿using LaunchManager.Controls;
 using LaunchManager.Models;
 using LaunchManager.Services;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -189,7 +191,6 @@ namespace LaunchManager
                                     ApplyProfileToExeXml(profilePath);
                                 }
                             }
-
                         }
                     }
                 }
@@ -327,35 +328,33 @@ namespace LaunchManager
         {
             try
             {
-                string assemblyInfoUrl =
-                    "https://raw.githubusercontent.com/DMP79IT/Launch-Manager-2024/main/LaunchManager/Properties/AssemblyInfo.cs";
-
                 using (var client = new HttpClient())
                 {
                     client.Timeout = TimeSpan.FromSeconds(8);
+                    client.DefaultRequestHeaders.Add("User-Agent", "LaunchManager-2024");
+                    client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
 
-                    string assemblyInfoText = await client.GetStringAsync(assemblyInfoUrl);
+                    // LISTA TUTTI I TAG (funziona SEMPRE)
+                    string tagsUrl = "https://api.github.com/repos/DMP79IT/Launch-Manager-2024/tags";
+                    string json = await client.GetStringAsync(tagsUrl);
 
-                    // Cerca: [assembly: AssemblyFileVersion("1.3.1")]
-                    var match = Regex.Match(
-                        assemblyInfoText,
-                        @"AssemblyFileVersion\(""(?<ver>\d+\.\d+\.\d+)""\)");
+                    var tags = JArray.Parse(json);
+                    if (tags.Count == 0) return;
 
-                    if (!match.Success)
+                    // Prendi il PRIMO (più recente)
+                    string tagName = tags[0]["name"]?.Value<string>();
+                    if (string.IsNullOrEmpty(tagName) || !tagName.StartsWith("v"))
                         return;
 
-                    string onlineVersionStr = match.Groups["ver"].Value;
+                    string onlineVersionStr = tagName.Replace("v", "");
 
                     if (Version.TryParse(onlineVersionStr, out Version onlineVersion))
                     {
                         Version current = Assembly.GetExecutingAssembly().GetName().Version;
-
                         if (onlineVersion > current)
                         {
                             string onlineUrl = "https://it.flightsim.to/file/100036/launch-manager-2024";
-
                             var result = CustomDialogs.ShowUpdateDialog(current, onlineVersion);
-
                             if (result == DialogResult.Yes)
                             {
                                 System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
@@ -368,13 +367,8 @@ namespace LaunchManager
                     }
                 }
             }
-            catch
-            {
-                // Silenzioso se offline o se il file non è raggiungibile
-            }
+            catch { }
         }
-
-
 
 
         // Comando per il clic veloce con il tasto destro
