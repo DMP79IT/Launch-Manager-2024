@@ -645,9 +645,9 @@ namespace LaunchManager
 
                             // --- crea il file XML base ---
                             string xmlContent =
-            @"<?xml version=""1.0"" encoding=""utf-8""?>
-<ArrayOfPrograms_CL xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
-</ArrayOfPrograms_CL>";
+                                @"<?xml version=""1.0"" encoding=""utf-8""?>
+                            <ArrayOfPrograms_CL xmlns:xsd=""http://www.w3.org/2001/XMLSchema"" xmlns:xsi=""http://www.w3.org/2001/XMLSchema-instance"">
+                            </ArrayOfPrograms_CL>";
                             File.WriteAllText(profilePath, xmlContent);
 
                             // --- aggiorna la combo SENZA triggerare il reload ---
