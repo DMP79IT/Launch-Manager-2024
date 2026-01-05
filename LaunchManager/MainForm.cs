@@ -24,7 +24,7 @@ namespace LaunchManager
 
     public partial class MainForm : Form
     {
-        class ExeAppEntry  // ← QUI, subito dopo {
+        class ExeAppEntry
         {
             public string Name { get; set; }
             public string Path { get; set; }
@@ -210,24 +210,8 @@ namespace LaunchManager
 
             var profileApps = XmlStore.LoadPrograms(profilePath);
 
-            // 1) Backup
-            string backupDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "Launch Manager 2024",
-                sim,
-                "Backup"
-            );
-
-            if (!Directory.Exists(backupDir))
-                Directory.CreateDirectory(backupDir);
-
-            string backupFile = Path.Combine(
-                backupDir,
-                $"exe_backup_{DateTime.Now:yyyyMMdd_HHmmss}.xml"
-            );
-
-            if (File.Exists(exeXmlPath))
-                File.Copy(exeXmlPath, backupFile, true);
+            // 1) Backup con rotazione massima
+            string backupFile = BackupExeXml();
 
             // 2) Rebuild exe.xml
             var xml = new XmlDocument();
@@ -1483,25 +1467,8 @@ namespace LaunchManager
                         return;
                     }
 
-                    // Crea cartella Backup
-                    string backupDir = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                        "Launch Manager 2024",
-                        sim,
-                        "Backup"
-                    );
-
-                    if (!Directory.Exists(backupDir))
-                        Directory.CreateDirectory(backupDir);
-
-                    // Nome file backup con data e ora
-                    string backupFile = Path.Combine(
-                        backupDir,
-                        $"exe_backup_{DateTime.Now:yyyyMMdd_HHmmss}.xml"
-                    );
-
-                    // Copia file
-                    File.Copy(exeXmlPath, backupFile, true);
+                    // Backup manuale con rotazione
+                    string backupFile = BackupExeXml();
 
                     CustomDialogs.ShowInfo($"Backup created successfully!\n\nPath:\n{backupFile}", "Launch Manager 2024");
                 }
@@ -2670,7 +2637,7 @@ namespace LaunchManager
         }
 
 
-
+        // SALVATAGGIO DATI
         private void SaveData()
         {
             try
@@ -2716,8 +2683,40 @@ namespace LaunchManager
         }
 
 
+        // SALVATAGGIO FILES BACKUP DI exe.xml (MAX 5)
+        private string BackupExeXml(int maxBackups = 5)  // ← string!
+        {
+            try
+            {
+                string sim = Paths.CurrentSim;
+                string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+                string backupDir = Path.Combine(appData, "Launch Manager 2024", sim, "Backup");
+                Directory.CreateDirectory(backupDir);
 
+                string exeXmlPath = Paths.ExeXmlPath;
 
+                var backups = Directory.GetFiles(backupDir, "exe_backup_*.xml");    // Conta TUTTI i backup exe.xml_*
+                while (backups.Length >= maxBackups)  
+                {
+                    var oldest = backups.OrderBy(f => File.GetCreationTime(f)).First(); // Cancella fino a farli diventare 5
+                    File.Delete(oldest);
+                    backups = Directory.GetFiles(backupDir, "exe_backup_*.xml");
+                }
+
+                string today = DateTime.Now.ToString("yyyyMMdd");
+                string timestamp = DateTime.Now.ToString("HHmmss");
+                string backupPath = Path.Combine(backupDir, $"exe_backup_{today}_{timestamp}.xml");
+                if (File.Exists(exeXmlPath)) File.Copy(exeXmlPath, backupPath, true);
+
+                return backupPath;  // ← CRUCIALE! Per i dialog
+            }
+            catch
+            {
+                return "";  // ← Errore sicuro
+            }
+        }
+
+        
         // =========================================
         // CHIUSURA E SALVATAGGI FINALI
         // =========================================

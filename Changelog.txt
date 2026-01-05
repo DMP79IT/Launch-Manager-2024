@@ -4,6 +4,11 @@
 
 
 
+#### V. 1.4.2 ####
+
+🔹Change: exe.xml backups are now limited to 5 files max. The 6th automatically deletes the oldest.
+
+
 #### V. 1.4.1 ####
 
 🔹Improved update check: The program now automatically checks for updates using the official released versions, so you are notified more reliably when a new release is available.
