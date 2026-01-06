@@ -1,1 +1,6 @@
-.vs/
+# nasconde tutto
+*
+
+# mostra solo
+!.gitignore
+!LaunchManager/bin/Release/Launch Manager 2024.exe
