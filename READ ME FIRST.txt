@@ -1,0 +1,151 @@
+🛫 Launch Manager 2024 — User Guide
+
+Launch Manager 2024 is a portable and standalone application designed to simplify the management of all external programs you use with your simulator (such as SPAD.neXt, FSUIPC, Mobiflight, BeyondATC, AutoFPS, and many others).
+
+Launch Manager 2024 is designed to provide:  
+• Greater stability and compatibility with MSFS 2024  
+• Multi-profile management and automatic saves  
+• Intelligent instance control (LM Runner)  
+• Modern and responsive interface  
+• Advanced functions like drag & drop, manual sorting, automatic backups, and detailed logs  
+
+
+
+📦 Installation (Portable)
+Launch Manager 2024 is a portable application that requires no installation. It can be run directly from any folder or USB drive.
+
+To prepare it:
+
+1. Copy the program folder (containing Launch Manager 2024.exe) to a location of your choice (e.g., C:\Tools\Launch Manager 2024).
+2. Make sure the folder is not in a Windows protected path (like Program Files), otherwise the app will not be able to write configuration files.
+
+All user data is automatically saved in:
+
+%AppData%\Launch Manager 2024\
+(example: C:\Users\<Username>\AppData\Roaming\Launch Manager 2024)
+
+
+🧩 Folder Structure
+Launch Manager 2024 automatically creates:
+
+%AppData%\Launch Manager 2024\
+which contains subfolders and files.
+
+
+🚀 First Launch
+The program will automatically attempt to find the path to your simulator’s exe.xml file.  
+If it cannot be found, you will be prompted to locate it manually.  
+The program was developed with the MS Store version of the simulator in mind.
+You can change it anytime in Settings → Path EXE.XML.
+
+
+📋 Profile Management
+Each profile represents a group of applications that Launch Manager 2024 manages during a flight session.
+
+Profiles are stored in:
+%AppData%\Launch Manager 2024\FS2024\Profiles\
+
+Each profile is an XML file containing all app settings.  
+You can create, rename, or delete profiles directly from the main interface.
+
+
+🧱 Adding and Managing Applications
+Add an app and set the values as follows:
+
+- Name → Descriptive name.
+- Path → Executable or .lnk shortcut path (the executable path is automatically detected).
+- Arguments → Optional launch parameters.
+- Startup time (s) → Delay in seconds before launch after the simulator starts.
+
+Options:
+- Start minimized → Minimizes the app immediately or after the delay.
+- Close window → Minimizes or closes to tray immediately or after the delay.
+- Close when MSFS closes → Terminates the app when the simulator closes.
+- Start with → Defines whether the app is launched by MSFS or by LM.
+
+
+↕️ Drag & Drop and Manual Reordering
+You can drag and drop .exe or .lnk files directly into the main window — Launch Manager will automatically open the 'Add App' window filled with the correct path.
+
+You can also manually reorder the apps in the grid by dragging them. The order is automatically saved in the profile and preserved at launch.
+
+
+🔄 Launch and Session Management
+When FS2024 starts, the simulator automatically launches LM.exe for each app set with Mode=MSFS. Each LM instance:
+
+- Launches its assigned app;
+- Waits while the simulator is running;
+- When the simulator closes, terminates the app (if configured to do so) or leaves it open.
+
+You can also manually launch an app by clicking 'Launch App'.  
+Note: additional options are not applied when launched manually.
+
+
+🧰 Integrated Tools and Utilities
+Main buttons:
+- Open App Folder → Opens the folder of the selected app.
+- Create Backup → Saves a backup of the current exe.xml file.
+- Restore Backup → Restores exe.xml from an existing backup.
+- Clean Backup Folder → Deletes all backups in the Backup folder.
+- Open Backup Folder → Opens the Backup folder in File Explorer.
+- Open Profile Folder → Opens the Profiles folder.
+- Open Config.xml → Opens the configuration file for direct editing.
+
+
+🧠 Context Menu
+Right-click on the grid to open a quick access menu with the same functions as the toolbar.
+
+
+🔍 Log File
+Each LM session logs its activity in:
+%AppData%\Launch Manager 2024\LM_runner.log
+
+It contains details on app launches, closures, and errors.
+
+
+🧹 Backup and Restore
+Backups are stored in:
+%AppData%\Launch Manager 2024\FS2024\Backup\
+
+You can restore a backup from the Restore Backup menu or empty the folder using Clean Backup Folder.
+
+
+💡 Tips
+You can manage multiple profiles for different configurations (e.g., “VFR”, “IFR”, “Testing”, etc.).
+
+
+🧾 System Requirements
+• Windows 10 or 11 (x64)  
+• .NET Framework 4.8 or later  
+• Write permissions on %AppData%  
+
+
+
+=== CREDITS ===  
+Launch Manager 2024 is an evolution and reinterpretation of the original Launch Manager project created by Kobayashi82, available on Flightsim.to:  https://it.flightsim.to/file/51718/launch-manager  
+
+Kobayashi82’s work served as the foundation for the logical structure and philosophy of the program: automating and simplifying the management of external applications linked to Microsoft Flight Simulator.
+
+🔒 About Windows Defender False Positive (Important Notice)
+
+Some users may experience a warning from Windows Defender detecting Launch Manager 2024.exe as a Trojan.
+This is a false positive.
+
+I sincerely apologize for the inconvenience.
+The issue was caused by automated antivirus heuristics producing incorrect detections. Unfortunately, I was personally affected as well: Windows Defender deleted my own executable during the latest testing.
+
+Launch Manager 2024 contains no malware or harmful components.
+The most recent VirusTotal analysis confirms that the file is clean and safe.
+
+If Windows Defender blocks the file, you can safely allow or restore it.
+A Microsoft whitelisting request has already been submitted.
+
+⚠️ Disclaimer
+
+Launch Manager 2024 is a free, non-commercial tool developed for personal use only.
+It is not affiliated with, endorsed, or supported by Microsoft, Asobo Studio, or any third-party software mentioned in the documentation.
+
+The author assumes no responsibility for any data loss, software malfunction, or system instability that may occur as a result of using this program.
+All files and configurations created or modified by Launch Manager 2024 are the sole responsibility of the user.
+
+By using this software, you acknowledge and accept that it is provided “as is”, without any warranty of any kind — either express or implied.
