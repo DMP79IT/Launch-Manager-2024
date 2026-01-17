@@ -1,1 +1,30 @@
 .vs/
+(
+echo # Build Results
+echo /bin/
+echo /obj/
+echo *.pdb
+echo *.exe
+echo *.dll
+echo *.config
+
+echo # NuGet Packages
+echo packages/
+echo packages.lock.json
+
+echo # Visual Studio
+echo /.vs/
+echo bin/
+echo obj/
+echo *.user
+echo *.suo
+echo *.sln.docstates
+
+echo # Windows
+echo Thumbs.db
+echo ehthumbs.db
+echo Desktop.ini
+
+echo # macOS
+echo .DS_Store
+) > .gitignore

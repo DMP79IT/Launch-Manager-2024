@@ -203,15 +203,17 @@ namespace LaunchManager
             }
         }
 
-        private void ApplyProfileToExeXml(string profilePath)
+        public void ApplyProfileToExeXml(string profilePath)
         {
             string sim = Paths.CurrentSim;
             string exeXmlPath = Paths.ExeXmlPath;
 
             var profileApps = XmlStore.LoadPrograms(profilePath);
-
+            
             // 1) Backup con rotazione massima
+            Console.WriteLine("🎯 ApplyProfileToExeXml START");
             string backupFile = BackupExeXml();
+            Console.WriteLine($"📦 Backup result: '{backupFile}'");  // Vuoto = PROBLEMA!
 
             // 2) Rebuild exe.xml
             var xml = new XmlDocument();
@@ -988,24 +990,13 @@ namespace LaunchManager
                     string exeXmlPath = Paths.ExeXmlPath;
 
 
-                    // 3️⃣ Backup automatico
-                    string backupDir = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                        "Launch Manager 2024",
-                        sim,
-                        "Backup"
-                    );
-
-                    if (!Directory.Exists(backupDir))
-                        Directory.CreateDirectory(backupDir);
-
-                    string backupFile = Path.Combine(
-                        backupDir,
-                        $"exe_backup_{DateTime.Now:yyyyMMdd_HHmmss}.xml"
-                    );
-
-                    if (File.Exists(exeXmlPath))
-                        File.Copy(exeXmlPath, backupFile, true);
+                    // 3️⃣ Backup automatico vecchio
+                    string backupFile = BackupExeXml();
+                    if (string.IsNullOrEmpty(backupFile))
+                    {
+                        CustomDialogs.ShowError("Backup failed!", "Launch Manager 2024");
+                        return;  // Ferma se backup fallisce
+                    }
 
                     // 4️⃣ Ricostruisci exe.xml
                     var xml = new System.Xml.XmlDocument();
@@ -2684,7 +2675,7 @@ namespace LaunchManager
 
 
         // SALVATAGGIO FILES BACKUP DI exe.xml (MAX 5)
-        private string BackupExeXml(int maxBackups = 5)  // ← string!
+        private string BackupExeXml(int maxBackups = 5) // ← string!
         {
             try
             {
@@ -2695,8 +2686,8 @@ namespace LaunchManager
 
                 string exeXmlPath = Paths.ExeXmlPath;
 
-                var backups = Directory.GetFiles(backupDir, "exe_backup_*.xml");    // Conta TUTTI i backup exe.xml_*
-                while (backups.Length >= maxBackups)  
+                var backups = Directory.GetFiles(backupDir, "exe_backup_*.xml"); // Conta TUTTI i backup exe.xml_*
+                while (backups.Length >= maxBackups)
                 {
                     var oldest = backups.OrderBy(f => File.GetCreationTime(f)).First(); // Cancella fino a farli diventare 5
                     File.Delete(oldest);
@@ -2708,15 +2699,16 @@ namespace LaunchManager
                 string backupPath = Path.Combine(backupDir, $"exe_backup_{today}_{timestamp}.xml");
                 if (File.Exists(exeXmlPath)) File.Copy(exeXmlPath, backupPath, true);
 
-                return backupPath;  // ← CRUCIALE! Per i dialog
+                return backupPath; // ← CRUCIALE! Per i dialog
             }
             catch
             {
-                return "";  // ← Errore sicuro
+                return ""; // ← Errore sicuro
             }
         }
 
-        
+
+
         // =========================================
         // CHIUSURA E SALVATAGGI FINALI
         // =========================================

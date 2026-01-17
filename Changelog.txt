@@ -2,51 +2,11 @@
 						######## 	🛫 Launch Manager 2024 — Changelog	########
 						########################################################
 
-private async void CheckForUpdates()
-{
-    try
-    {
-        using (var client = new HttpClient())
-        {
-            client.Timeout = TimeSpan.FromSeconds(8);
-            client.DefaultRequestHeaders.Add("User-Agent", "LaunchManager-2024");
-            client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
 
-            // LISTA TUTTI I TAG (funziona SEMPRE)
-            string tagsUrl = "https://api.github.com/repos/DMP79IT/Launch-Manager-2024/tags";
-            string json = await client.GetStringAsync(tagsUrl);
+#### V. 1.4.3 ####
 
-            var tags = JArray.Parse(json);
-            if (tags.Count == 0) return;
+🔹Fixed: App wouldn't delete old backups after 6th one
 
-            // Prendi il PRIMO (più recente)
-            string tagName = tags[0]["name"]?.Value<string>();
-            if (string.IsNullOrEmpty(tagName) || !tagName.StartsWith("v"))
-                return;
-
-            string onlineVersionStr = tagName.Replace("v", "");
-
-            if (Version.TryParse(onlineVersionStr, out Version onlineVersion))
-            {
-                Version current = Assembly.GetExecutingAssembly().GetName().Version;
-                if (onlineVersion > current)
-                {
-                    string onlineUrl = "https://it.flightsim.to/file/100036/launch-manager-2024";
-                    var result = CustomDialogs.ShowUpdateDialog(current, onlineVersion);
-                    if (result == DialogResult.Yes)
-                    {
-                        System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                        {
-                            FileName = onlineUrl,
-                            UseShellExecute = true
-                        });
-                    }
-                }
-            }
-        }
-    }
-    catch { }
-}
 
 #### V. 1.4.2 ####
 
