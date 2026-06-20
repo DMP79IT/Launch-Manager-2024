@@ -1,4 +1,5 @@
 ﻿using LaunchManager.Controls;
+using LaunchManager.Services;
 using System;
 using System.IO;
 using System.Linq;
@@ -75,15 +76,17 @@ namespace LaunchManager
         {
             try
             {
-                string backupDir = Paths.GetBackupPath();
+                string backupDir = ConfigService.GetEffectiveBackupPath();
 
                 if (!Directory.Exists(backupDir))
                 {
-                    CustomDialogs.ShowError("The backup folder does not exist.", "Launch Manager 2024");
+                    CustomDialogs.ShowError($"The backup folder does not exist.\n{backupDir}", "Launch Manager 2024");
                     return;
                 }
 
-                var files = Directory.GetFiles(backupDir, "*.xml")
+                cmbBackups.Items.Clear();
+
+                var files = Directory.GetFiles(backupDir, "exebackup_*.xml")
                                      .OrderByDescending(f => File.GetLastWriteTime(f))
                                      .ToList();
 
@@ -112,7 +115,9 @@ namespace LaunchManager
                 return;
             }
 
-            string selectedFile = Path.Combine(Paths.GetBackupPath(), cmbBackups.SelectedItem.ToString());
+            string backupDir = ConfigService.GetEffectiveBackupPath();
+            string selectedFile = Path.Combine(backupDir, cmbBackups.SelectedItem.ToString());
+
             if (!File.Exists(selectedFile))
             {
                 CustomDialogs.ShowError("The selected file no longer exists.", "Launch Manager 2024");

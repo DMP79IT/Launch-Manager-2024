@@ -3,6 +3,13 @@
 						########################################################
 
 
+#### V. 1.5.0 ####
+
+🔹Added, in the Settings window, the option to set a custom path for exe.xml backups. 
+
+🔹Updated all buttons related to exe.xml backups.
+
+
 #### V. 1.4.3 ####
 
 🔹Fixed: App wouldn't delete old backups after 6th one

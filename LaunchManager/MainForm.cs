@@ -205,83 +205,108 @@ namespace LaunchManager
 
         public void ApplyProfileToExeXml(string profilePath)
         {
-            string sim = Paths.CurrentSim;
-            string exeXmlPath = Paths.ExeXmlPath;
-
-            var profileApps = XmlStore.LoadPrograms(profilePath);
-            
-            // 1) Backup con rotazione massima
-            Console.WriteLine("🎯 ApplyProfileToExeXml START");
-            string backupFile = BackupExeXml();
-            Console.WriteLine($"📦 Backup result: '{backupFile}'");  // Vuoto = PROBLEMA!
-
-            // 2) Rebuild exe.xml
-            var xml = new XmlDocument();
-            xml.AppendChild(xml.CreateXmlDeclaration("1.0", "utf-8", null));
-
-            var root = xml.CreateElement("SimBase.Document");
-            root.SetAttribute("Type", "SimConnect");
-            root.SetAttribute("version", "1,0");
-            xml.AppendChild(root);
-
-            var descr = xml.CreateElement("Descr");
-            descr.InnerText = "SimConnect";
-            root.AppendChild(descr);
-
-            var filename = xml.CreateElement("Filename");
-            filename.InnerText = "SimConnect.xml";
-            root.AppendChild(filename);
-
-            var disabled = xml.CreateElement("Disabled");
-            disabled.InnerText = "False";
-            root.AppendChild(disabled);
-
-            foreach (var app in profileApps)
+            try
             {
-                var add = xml.CreateElement("Launch.Addon");
+                string sim = Paths.CurrentSim;
+                string exeXmlPath = Paths.ExeXmlPath;
 
-                void AddNode(string name, string value)
+                if (string.IsNullOrWhiteSpace(profilePath) || !File.Exists(profilePath))
                 {
-                    var node = xml.CreateElement(name);
-                    node.InnerText = value;
-                    add.AppendChild(node);
+                    CustomDialogs.ShowError("The selected profile file does not exist.", "Launch Manager 2024");
+                    return;
                 }
 
-                AddNode("Name", app.Name);
-                AddNode("Disabled", app.Active ? "False" : "True");
-                AddNode("ManualLoad", "False");
-
-                if (app.Mode == "LM")
+                if (string.IsNullOrWhiteSpace(exeXmlPath))
                 {
-                    string lmPath = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                        "Launch Manager 2024",
-                        "LM.exe"
-                    );
-
-                    AddNode("Path", lmPath);
-
-                    if (!string.IsNullOrEmpty(app.ID))
-                        AddNode("CommandLine", app.ID);
+                    CustomDialogs.ShowError("The simulator exe.xml path is not configured.", "Launch Manager 2024");
+                    return;
                 }
-                else
-                {
-                    AddNode("Path", app.Path);
 
-                    if (!string.IsNullOrWhiteSpace(app.Arguments))
-                        AddNode("CommandLine", app.Arguments);
+                var profileApps = XmlStore.LoadPrograms(profilePath);
+
+                // 1) Backup con rotazione massima
+                Console.WriteLine("🎯 ApplyProfileToExeXml START");
+                string backupFile = BackupExeXml();
+                Console.WriteLine($"📦 Backup result: '{backupFile}'");  // Vuoto = PROBLEMA!
+
+                if (string.IsNullOrWhiteSpace(backupFile))
+                {
+                    CustomDialogs.ShowError("Backup failed!", "Launch Manager 2024");
+                    return;
+                }
+
+                // 2) Rebuild exe.xml
+                var xml = new XmlDocument();
+                xml.AppendChild(xml.CreateXmlDeclaration("1.0", "utf-8", null));
+
+                var root = xml.CreateElement("SimBase.Document");
+                root.SetAttribute("Type", "SimConnect");
+                root.SetAttribute("version", "1,0");
+                xml.AppendChild(root);
+
+                var descr = xml.CreateElement("Descr");
+                descr.InnerText = "SimConnect";
+                root.AppendChild(descr);
+
+                var filename = xml.CreateElement("Filename");
+                filename.InnerText = "SimConnect.xml";
+                root.AppendChild(filename);
+
+                var disabled = xml.CreateElement("Disabled");
+                disabled.InnerText = "False";
+                root.AppendChild(disabled);
+
+                foreach (var app in profileApps)
+                {
+                    var add = xml.CreateElement("Launch.Addon");
+
+                    void AddNode(string name, string value)
+                    {
+                        var node = xml.CreateElement(name);
+                        node.InnerText = value ?? string.Empty;
+                        add.AppendChild(node);
+                    }
+
+                    AddNode("Name", app.Name);
+                    AddNode("Disabled", app.Active ? "False" : "True");
+                    AddNode("ManualLoad", "False");
+
+                    if (string.Equals(app.Mode, "LM", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string lmPath = Path.Combine(
+                            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                            "Launch Manager 2024",
+                            "LM.exe"
+                        );
+
+                        AddNode("Path", lmPath);
+
+                        if (!string.IsNullOrWhiteSpace(app.ID))
+                            AddNode("CommandLine", app.ID);
+                    }
+                    else
+                    {
+                        AddNode("Path", app.Path);
+
+                        if (!string.IsNullOrWhiteSpace(app.Arguments))
+                            AddNode("CommandLine", app.Arguments);
+                    }
 
                     AddNode("NewConsole", "False");
+
+                    root.AppendChild(add);
                 }
 
-                root.AppendChild(add);
+                xml.Save(exeXmlPath);
+
+                CustomDialogs.ShowInfo(
+                    $"exe.xml has been aligned to profile:\n{Path.GetFileName(profilePath)}\n\nBackup saved in:\n{backupFile}",
+                    "Launch Manager 2024");
             }
-
-            xml.Save(exeXmlPath);
-
-            CustomDialogs.ShowInfo(
-                $"exe.xml has been aligned to profile:\n{Path.GetFileName(profilePath)}",
-                "Launch Manager 2024");
+            catch (Exception ex)
+            {
+                CustomDialogs.ShowError("Error applying profile: " + ex.Message, "Launch Manager 2024");
+            }
         }
 
 
@@ -946,7 +971,13 @@ namespace LaunchManager
 
 
             // === APPLICA PROFILO ===
-
+            // Applica al simulatore il profilo selezionato nella combo.
+            // Flusso:
+            // 1) controlla che esista una selezione,
+            // 2) salva il profilo come attivo nel config,
+            // 3) legge il file profilo dalla cartella Profiles del sim corrente,
+            // 4) crea un backup del vecchio exe.xml,
+            // 5) ricostruisce e salva il nuovo exe.xml in base alle app del profilo.
             var btnApplyProfile = new ToolStripButton()
             {
                 Image = LoadIcon("ApplyProfile.png"),
@@ -956,6 +987,7 @@ namespace LaunchManager
             toolbar.Items.Add(btnApplyProfile);
             btnApplyProfile.Click += (s, e) =>
             {
+                // Verifica che l'utente abbia selezionato un profilo
                 if (cmbProfiles.SelectedItem == null)
                 {
                     CustomDialogs.ShowError("Select a profile to apply", "Launch Manager 2024");
@@ -964,9 +996,12 @@ namespace LaunchManager
 
                 string selectedProfile = cmbProfiles.SelectedItem.ToString();
 
+                // Salva il nome del profilo attivo nel file di configurazione
                 ConfigService.SetActiveProfile(selectedProfile + ".xml");
 
-                string sim = Paths.CurrentSim; // "FS2024"
+                // Costruisce il percorso completo del file profilo
+                // in: %AppData%\Launch Manager 2024\<sim>\Profiles\
+                string sim = Paths.CurrentSim; // es. "FS2024"
                 string profilesDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                     "Launch Manager 2024",
@@ -975,6 +1010,7 @@ namespace LaunchManager
                 );
                 string profilePath = Path.Combine(profilesDir, selectedProfile + ".xml");
 
+                // Sicurezza: interrompe se il file profilo non esiste
                 if (!File.Exists(profilePath))
                 {
                     CustomDialogs.ShowError("The selected profile does not exist", "Launch Manager 2024");
@@ -983,22 +1019,23 @@ namespace LaunchManager
 
                 try
                 {
-                    // 1️⃣ Legge il profilo
+                    // 1️⃣ Legge il contenuto del profilo selezionato
+                    //    (lista app, modalità LM/MSFS, argomenti, stato attivo, ecc.)
                     var profileApps = XmlStore.LoadPrograms(profilePath);
 
-                    // 2️⃣ Percorso exe.xml del simulatore
+                    // 2️⃣ Recupera il percorso del file exe.xml del simulatore
                     string exeXmlPath = Paths.ExeXmlPath;
 
 
-                    // 3️⃣ Backup automatico vecchio
+                    // 3️⃣ Crea un backup automatico del vecchio exe.xml prima di sovrascriverlo
                     string backupFile = BackupExeXml();
                     if (string.IsNullOrEmpty(backupFile))
                     {
                         CustomDialogs.ShowError("Backup failed!", "Launch Manager 2024");
-                        return;  // Ferma se backup fallisce
+                        return;  // Ferma tutto se il backup non è stato creato correttamente
                     }
 
-                    // 4️⃣ Ricostruisci exe.xml
+                    // 4️⃣ Ricostruisce da zero il nuovo exe.xml
                     var xml = new System.Xml.XmlDocument();
                     xml.AppendChild(xml.CreateXmlDeclaration("1.0", "utf-8", null));
 
@@ -1008,6 +1045,7 @@ namespace LaunchManager
                     xml.AppendChild(root);
 
                     // === INTESTAZIONE STANDARD DI MSFS ===
+                    // Questi nodi fanno parte della struttura base del file exe.xml
                     var descr = xml.CreateElement("Descr");
                     descr.InnerText = "SimConnect";
                     root.AppendChild(descr);
@@ -1021,14 +1059,16 @@ namespace LaunchManager
                     root.AppendChild(disabled);
 
 
-                    // RICOSTRUZIONE EXE.XML
-                    // Le app in modalità LM vengono avviate tramite LM.exe (CommandLine = ID)
-                    // Le app in modalità MSFS vengono avviate direttamente
+                    // === RICOSTRUZIONE DELLA SEZIONE Launch.Addon ===
+                    // Ogni app del profilo genera un blocco <Launch.Addon>.
+                    // - Modalità LM   -> avvio tramite LM.exe, con ID passato in CommandLine
+                    // - Modalità MSFS -> avvio diretto dell'eseguibile dell'app
 
                     foreach (var app in profileApps)
                     {
                         var add = xml.CreateElement("Launch.Addon");
 
+                        // Helper locale per aggiungere rapidamente i nodi XML figli
                         void AddNode(string name, string value)
                         {
                             var node = xml.CreateElement(name);
@@ -1036,14 +1076,16 @@ namespace LaunchManager
                             add.AppendChild(node);
                         }
 
+                        // Dati comuni a tutte le app
                         AddNode("Name", app.Name);
                         AddNode("Disabled", app.Active ? "False" : "True");
                         AddNode("ManualLoad", "False");
 
-                        // --- LOGICA PRINCIPALE ---
+                        // --- LOGICA PRINCIPALE DI SCRITTURA ---
                         if (app.Mode == "LM")
                         {
-                            // Percorso del Launch Manager
+                            // In modalità LM l'app non viene lanciata direttamente da MSFS:
+                            // MSFS avvia LM.exe, poi LM gestisce l'app tramite il suo ID
                             string lmPath = Path.Combine(
                                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                                 "Launch Manager 2024",
@@ -1052,33 +1094,35 @@ namespace LaunchManager
 
                             AddNode("Path", lmPath);
 
-                            // CommandLine = ID dell'app (già presente nel profilo)
+                            // CommandLine contiene l'ID univoco dell'app salvato nel profilo
                             if (!string.IsNullOrEmpty(app.ID))
                                 AddNode("CommandLine", app.ID);
                         }
                         else // Mode == "MSFS"
                         {
-                            // Avvio diretto dell'applicazione
+                            // In modalità MSFS il simulatore avvia direttamente il file dell'app
                             AddNode("Path", app.Path);
 
-                            // ✅ Se ci sono argomenti, aggiungili come CommandLine
+                            // Se presenti, passa anche gli argomenti della riga di comando
                             if (!string.IsNullOrWhiteSpace(app.Arguments))
                                 AddNode("CommandLine", app.Arguments);
 
-                            // (Facoltativo) per compatibilità con lo schema MSFS
+                            // Nodo opzionale, mantenuto per compatibilità con lo schema exe.xml
                             AddNode("NewConsole", "False");
                         }
 
                         root.AppendChild(add);
                     }
 
-                    // 5️⃣ Salva il nuovo exe.xml
+                    // 5️⃣ Salva su disco il nuovo exe.xml appena ricostruito
                     xml.Save(exeXmlPath);
 
+                    // Messaggio finale con conferma applicazione profilo e percorso backup
                     CustomDialogs.ShowInfo($"Profile '{selectedProfile}' successfully applied.\nBackup saved in:\n{backupFile}", "Launch Manager 2024");
                 }
                 catch (Exception ex)
                 {
+                    // Gestione errori generale dell'operazione di apply
                     CustomDialogs.ShowError($"Error applying profile:\n{ex.Message}", "Launch Manager 2024");
                 }
             };
@@ -1303,7 +1347,7 @@ namespace LaunchManager
             // === PULSANTE CLEAN BACKUP FOLDER ===
             var btnCleanBackup = new ToolStripButton()
             {
-                Image = LoadIcon("CleanBackupFolder.png"), // oppure null se non hai l'icona
+                Image = LoadIcon("CleanBackupFolder.png"),
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 ToolTipText = "Clean backup folder",
                 Alignment = ToolStripItemAlignment.Right
@@ -1312,13 +1356,7 @@ namespace LaunchManager
 
             btnCleanBackup.Click += (s, e) =>
             {
-                string sim = "FS2024"; // puoi renderlo dinamico se supporti più simulatori
-                string backupDir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "Launch Manager 2024",
-                    sim,
-                    "Backup"
-                );
+                string backupDir = ConfigService.GetEffectiveBackupPath();
 
                 if (!Directory.Exists(backupDir))
                 {
@@ -1327,8 +1365,8 @@ namespace LaunchManager
                 }
 
                 var confirm = CustomDialogs.ConfirmCleanup(
-                "Do you really want to delete all backup files?",
-                "Confirm Cleanup"
+                    "Do you really want to delete all backup files?",
+                    "Confirm Cleanup"
                 );
 
                 if (confirm == DialogResult.Yes)
@@ -1338,7 +1376,7 @@ namespace LaunchManager
                         foreach (var file in Directory.GetFiles(backupDir))
                             File.Delete(file);
 
-                        CustomDialogs.ShowInfo("Backup folder successfully cleaned.", "Launch Manager 2024");
+                        CustomDialogs.ShowInfo("Backup folder successfully cleaned!", "Launch Manager 2024");
                     }
                     catch (Exception ex)
                     {
@@ -1349,10 +1387,9 @@ namespace LaunchManager
 
 
             // === APRI CARTELLA BACKUP ===
-
             var btnOpenBackupFolder = new ToolStripButton()
             {
-                Image = LoadIcon("OpenBackupFolder.png"), // opzionale: icona per il pulsante
+                Image = LoadIcon("OpenBackupFolder.png"),
                 DisplayStyle = ToolStripItemDisplayStyle.Image,
                 ToolTipText = "Open backup folder",
                 Alignment = ToolStripItemAlignment.Right
@@ -1361,13 +1398,7 @@ namespace LaunchManager
 
             btnOpenBackupFolder.Click += (s, e) =>
             {
-                string sim = "FS2024"; // se serve puoi renderlo dinamico
-                string backupDir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "Launch Manager 2024",
-                    sim,
-                    "Backup"
-                );
+                string backupDir = ConfigService.GetEffectiveBackupPath();
 
                 try
                 {
@@ -2233,12 +2264,7 @@ namespace LaunchManager
 
             var ctxOpenBackup = AddMenuItem("Open Backup Folder", "OpenBackupFolder.png", (s, e) =>
             {
-                string backupDir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "Launch Manager 2024",
-                    "FS2024",
-                    "Backup"
-                );
+                string backupDir = ConfigService.GetEffectiveBackupPath();
 
                 try
                 {
@@ -2255,12 +2281,7 @@ namespace LaunchManager
 
             var ctxCleanBackup = AddMenuItem("Clean Backup Folder", "CleanBackupFolder.png", (s, e) =>
             {
-                string backupDir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "Launch Manager 2024",
-                    "FS2024",
-                    "Backup"
-                );
+                string backupDir = ConfigService.GetEffectiveBackupPath();
 
                 if (!Directory.Exists(backupDir))
                 {
@@ -2275,7 +2296,7 @@ namespace LaunchManager
                         foreach (var file in Directory.GetFiles(backupDir))
                             File.Delete(file);
 
-                        CustomDialogs.ShowInfo("Backup folder cleaned successfully!", "Launch Manager 2024");
+                        CustomDialogs.ShowInfo("Backup folder successfully cleaned!", "Launch Manager 2024");
                     }
                     catch (Exception ex)
                     {
@@ -2315,12 +2336,7 @@ namespace LaunchManager
                     ctxOpen.Enabled = hasSelection;
 
                     // --- Disattiva "Restore Backup" se la cartella è vuota ---
-                    string backupDir = Path.Combine(
-                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                        "Launch Manager 2024",
-                        "FS2024",
-                        "Backup"
-                    );
+                    string backupDir = ConfigService.GetEffectiveBackupPath();
 
                     bool hasBackups = Directory.Exists(backupDir) && Directory.GetFiles(backupDir).Length > 0;
                     ctxRestore.Enabled = hasBackups;
@@ -2532,24 +2548,14 @@ namespace LaunchManager
         {
             try
             {
-                // 🧹 Pulisce la griglia e il dizionario icone
                 grid.Rows.Clear();
                 appIcons.Clear();
 
-                // Nessun profilo selezionato → esci
                 if (cmbProfiles == null || cmbProfiles.SelectedItem == null)
                     return;
 
-                string sim = Paths.CurrentSim;
                 string profileName = cmbProfiles.SelectedItem.ToString();
-
-                string profilePath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "Launch Manager 2024",
-                    sim,
-                    "Profiles",
-                    profileName + ".xml"
-                );
+                string profilePath = Path.Combine(Paths.GetProfilesPath(), profileName + ".xml");
 
                 if (!File.Exists(profilePath))
                     return;
@@ -2679,9 +2685,7 @@ namespace LaunchManager
         {
             try
             {
-                string sim = Paths.CurrentSim;
-                string appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                string backupDir = Path.Combine(appData, "Launch Manager 2024", sim, "Backup");
+                string backupDir = ConfigService.GetEffectiveBackupPath();
                 Directory.CreateDirectory(backupDir);
 
                 string exeXmlPath = Paths.ExeXmlPath;
@@ -2735,9 +2739,11 @@ namespace LaunchManager
                 {
                     xml.Load(configPath);
                     root = xml.SelectSingleNode("/Config") as System.Xml.XmlElement;
+
                     if (root == null)
                     {
                         xml.RemoveAll();
+                        xml.AppendChild(xml.CreateXmlDeclaration("1.0", "utf-8", null));
                         root = xml.CreateElement("Config");
                         xml.AppendChild(root);
                     }
@@ -2751,21 +2757,26 @@ namespace LaunchManager
 
                 void Upsert(string name, string value)
                 {
-                    var el = root[name] ?? xml.CreateElement(name);
+                    var el = root[name];
+                    if (el == null)
+                    {
+                        el = xml.CreateElement(name);
+                        root.AppendChild(el);
+                    }
+
                     el.InnerText = value ?? string.Empty;
-                    if (el.ParentNode == null) root.AppendChild(el);
                 }
 
                 // === STATO FINESTRA ===
-
                 Upsert("WindowX", Location.X.ToString());
                 Upsert("WindowY", Location.Y.ToString());
                 Upsert("WindowWidth", Width.ToString());
                 Upsert("WindowHeight", Height.ToString());
                 Upsert("WindowState", WindowState.ToString());
 
-                // === PERCORSO EXE.XML ===
+                // === PERCORSI ===
                 Upsert("ExeXmlPath", Paths.ExeXmlPath);
+                Upsert("BackupPath", ConfigService.GetBackupPath() ?? string.Empty);
 
                 xml.Save(configPath);
 
@@ -2780,7 +2791,7 @@ namespace LaunchManager
 
                         if (row.Tag is AppEntry app)
                         {
-                            app.Active = Convert.ToBoolean(row.Cells[0].Value ?? app.Active);
+                            app.Active = row.Cells[0].Value is bool active ? active : app.Active;
                             app.Name = row.Cells[1].Value?.ToString() ?? app.Name;
                             app.Mode = row.Cells[2].Value?.ToString() ?? app.Mode;
                             app.Path = row.Cells[3].Value?.ToString() ?? app.Path;
@@ -2801,12 +2812,13 @@ namespace LaunchManager
 
                     string profileName = cmbProfiles?.SelectedItem?.ToString() ?? "Default";
                     string profilePath = Path.Combine(Paths.GetProfilesPath(), $"{profileName}.xml");
+
                     XmlStore.SavePrograms(appList, profilePath);
                 }
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[ERROR] Autosave failed: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[ERROR] SaveCompleteConfiguration failed: {ex.Message}");
             }
         }
 
@@ -2822,6 +2834,7 @@ namespace LaunchManager
                 {
                     using (SolidBrush b = new SolidBrush(Color.FromArgb(230, 243, 255)))
                         e.Graphics.FillRectangle(b, rect);
+
                     using (Pen p = new Pen(Color.FromArgb(180, 210, 255)))
                         e.Graphics.DrawRectangle(p, new Rectangle(0, 0, rect.Width - 1, rect.Height - 1));
                 }
@@ -2836,11 +2849,11 @@ namespace LaunchManager
         // =========================================
         // CONFRONTO INIZIALE exe.xml / file profilo.xml
         // =========================================
-
         private List<ExeAppEntry> ParseExeXmlApps(string exeXmlPath)
         {
             var exeApps = new List<ExeAppEntry>();
-            if (!File.Exists(exeXmlPath)) return exeApps;
+            if (!File.Exists(exeXmlPath))
+                return exeApps;
 
             var xml = new XmlDocument();
             xml.Load(exeXmlPath);
@@ -2848,37 +2861,60 @@ namespace LaunchManager
             var addons = xml.SelectNodes("//Launch.Addon");
             foreach (XmlNode addon in addons)
             {
-                var app = new ExeAppEntry();
-                app.Name = addon.SelectSingleNode("Name")?.InnerText ?? "";
-                app.Path = addon.SelectSingleNode("Path")?.InnerText ?? "";
-                app.CommandLine = addon.SelectSingleNode("CommandLine")?.InnerText ?? "";
-                var disabledText = addon.SelectSingleNode("Disabled")?.InnerText;
+                var app = new ExeAppEntry
+                {
+                    Name = addon.SelectSingleNode("Name")?.InnerText ?? "",
+                    Path = addon.SelectSingleNode("Path")?.InnerText ?? "",
+                    CommandLine = addon.SelectSingleNode("CommandLine")?.InnerText ?? ""
+                };
+
+                string disabledText = addon.SelectSingleNode("Disabled")?.InnerText;
                 app.Disabled = string.Equals(disabledText, "True", StringComparison.OrdinalIgnoreCase);
+
                 exeApps.Add(app);
             }
+
             return exeApps;
         }
 
-
         // Codice x il salvataggio nascosto
-
         private void AutoSaveCurrentProfile()
         {
-            string profileName = cmbProfiles.SelectedItem?.ToString();
+            string profileName = cmbProfiles?.SelectedItem?.ToString();
             if (string.IsNullOrWhiteSpace(profileName))
                 return;
 
-            string sim = Paths.CurrentSim;
-            string profilesDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                "Launch Manager 2024", sim, "Profiles"
-            );
-            string profilePath = Path.Combine(profilesDir, profileName + ".xml");
+            string profileDir = Paths.GetProfilesPath();
+            Directory.CreateDirectory(profileDir);
+
+            string profilePath = Path.Combine(profileDir, profileName + ".xml");
 
             var appList = new List<AppEntry>();
+
             foreach (DataGridViewRow r in grid.Rows)
-                if (!r.IsNewRow && r.Tag is AppEntry a)
+            {
+                if (r.IsNewRow) continue;
+
+                if (r.Tag is AppEntry a)
+                {
+                    a.Active = r.Cells[0].Value is bool active ? active : a.Active;
+                    a.Name = r.Cells[1].Value?.ToString() ?? a.Name;
+                    a.Mode = r.Cells[2].Value?.ToString() ?? a.Mode;
+                    a.Path = r.Cells[3].Value?.ToString() ?? a.Path;
+
                     appList.Add(a);
+                }
+                else
+                {
+                    appList.Add(new AppEntry
+                    {
+                        Active = r.Cells[0].Value is bool b && b,
+                        Name = r.Cells[1].Value?.ToString(),
+                        Mode = r.Cells[2].Value?.ToString(),
+                        Path = r.Cells[3].Value?.ToString()
+                    });
+                }
+            }
 
             XmlStore.SavePrograms(appList, profilePath);
         }

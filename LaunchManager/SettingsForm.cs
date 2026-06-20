@@ -1,4 +1,5 @@
 ﻿using LaunchManager.Controls;
+using LaunchManager.Services;
 using System;
 using System.Drawing;
 using System.IO;
@@ -9,8 +10,10 @@ namespace LaunchManager
     public partial class SettingsForm : Form
     {
         private TextBox txtExePath;
+        private TextBox txtBackupPath;
         private CustomComboBox cmbTheme;
         private Button btnBrowse;
+        private Button btnBrowseBackup;
         private Button btnOK;
         private Button btnCancel;
         private Button btnOpenConfig;
@@ -22,7 +25,7 @@ namespace LaunchManager
         public SettingsForm(string currentSim, string currentExePath, string currentTheme)
         {
             Text = "Settings";
-            Size = new Size(500, 250);
+            Size = new Size(500, 320);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             StartPosition = FormStartPosition.CenterParent;
             MaximizeBox = false;
@@ -42,7 +45,7 @@ namespace LaunchManager
             var lblTheme = new Label
             {
                 Text = "Theme:",
-                Location = new Point(20, 140),
+                Location = new Point(20, 200),
                 AutoSize = true
             };
             Controls.Add(lblTheme);
@@ -50,7 +53,7 @@ namespace LaunchManager
             // --- COMBOBOX THEME ---
             cmbTheme = new CustomComboBox
             {
-                Location = new Point(80, 138),
+                Location = new Point(80, 198),
                 Width = 120,
                 DropDownStyle = ComboBoxStyle.DropDownList
             };
@@ -61,7 +64,6 @@ namespace LaunchManager
             cmbTheme.SelectedItem = currentTheme == "Dark" ? "Dark" : "Light";
 
             Controls.Add(cmbTheme);
-
 
             // --- TEXTBOX PATH ---
             txtExePath = new TextBox
@@ -93,13 +95,54 @@ namespace LaunchManager
             };
             Controls.Add(btnBrowse);
 
+            // --- LABEL BACKUP PATH ---
+            var lblBackupPath = new Label
+            {
+                Text = "Backup folder",
+                Location = new Point(20, 85),
+                AutoSize = true
+            };
+            Controls.Add(lblBackupPath);
+
+            // --- TEXTBOX BACKUP PATH ---
+            txtBackupPath = new TextBox
+            {
+                Text = ConfigService.GetEffectiveBackupPath(),
+                Location = new Point(20, 110),
+                Width = 360
+            };
+            Controls.Add(txtBackupPath);
+
+            // --- PULSANTE SFOGLIA BACKUP ---
+            btnBrowseBackup = new Button
+            {
+                Text = "Browse...",
+                Location = new Point(390, 109),
+                Width = 70
+            };
+            btnBrowseBackup.Click += (s, e) =>
+            {
+                using (var fbd = new FolderBrowserDialog())
+                {
+                    fbd.Description = "Select the folder where exe.xml backups will be saved";
+
+                    if (Directory.Exists(txtBackupPath.Text))
+                        fbd.SelectedPath = txtBackupPath.Text;
+
+                    if (fbd.ShowDialog() == DialogResult.OK)
+                    {
+                        txtBackupPath.Text = fbd.SelectedPath;
+                    }
+                }
+            };
+            Controls.Add(btnBrowseBackup);
 
             // --- PULSANTE: OPEN CONFIG.XML ---
             btnOpenConfig = new Button
             {
                 Text = "Open file Config.xml",
                 TextAlign = ContentAlignment.MiddleCenter,
-                Location = new Point(20, 100),
+                Location = new Point(20, 150),
                 Width = 120,
                 FlatStyle = FlatStyle.System
             };
@@ -129,7 +172,7 @@ namespace LaunchManager
             {
                 Text = "Open Launch Manager 2024 Folder",
                 TextAlign = ContentAlignment.MiddleCenter,
-                Location = new Point(180, 100),
+                Location = new Point(180, 150),
                 Width = 200,
                 FlatStyle = FlatStyle.System
             };
@@ -162,13 +205,14 @@ namespace LaunchManager
             btnOK = new Button
             {
                 Text = "Confirm",
-                Location = new Point(220, 170),
+                Location = new Point(270, 230),
                 Width = 90
             };
 
             btnOK.Click += (s, e) =>
             {
                 ExeXmlPath = txtExePath.Text.Trim();
+                string backupPath = txtBackupPath.Text.Trim();
 
                 if (string.IsNullOrWhiteSpace(ExeXmlPath))
                 {
@@ -176,8 +220,16 @@ namespace LaunchManager
                     return;
                 }
 
+                if (string.IsNullOrWhiteSpace(backupPath))
+                {
+                    CustomDialogs.ShowError("Please enter a valid backup folder.", "Launch Manager 2024");
+                    return;
+                }
+
                 try
                 {
+                    Directory.CreateDirectory(backupPath);
+
                     string configPath = Paths.GetConfigPath();
 
                     // Assicura che il file esista
@@ -206,6 +258,12 @@ namespace LaunchManager
                     if (originalThemeNode != null)
                         originalTheme = originalThemeNode.InnerText;
 
+                    // ✅ LEGGI BACKUP PATH ORIGINALE
+                    string originalBackupPath = null;
+                    var originalBackupNode = rootNode.SelectSingleNode("BackupPath");
+                    if (originalBackupNode != null)
+                        originalBackupPath = originalBackupNode.InnerText;
+
                     // SALVA PATH
                     if (originalNode != null) rootNode.RemoveChild(originalNode);
                     var exeNode = xml.CreateElement("ExeXmlPath");
@@ -219,12 +277,21 @@ namespace LaunchManager
                     themeNode.InnerText = selectedTheme;
                     rootNode.AppendChild(themeNode);
 
+                    // SALVA BACKUP PATH
+                    if (originalBackupNode != null) rootNode.RemoveChild(originalBackupNode);
+                    var backupNode = xml.CreateElement("BackupPath");
+                    backupNode.InnerText = backupPath;
+                    rootNode.AppendChild(backupNode);
+
                     xml.Save(configPath);
 
                     // Aggiorna in memoria
                     Paths.ExeXmlPath = ExeXmlPath;
                     ThemeManager.CurrentTheme = selectedTheme == "Dark" ? ThemeManager.ThemeMode.Dark : ThemeManager.ThemeMode.Light;
                     ThemeManager.SaveTheme();
+
+                    // Aggiorna anche il backup path nel config service
+                    ConfigService.SetBackupPath(backupPath);
 
                     // ✅ MESSAGGI SOLO SE CAMBIATI
                     if (!string.Equals(ExeXmlPath, originalPath, StringComparison.OrdinalIgnoreCase))
@@ -235,6 +302,11 @@ namespace LaunchManager
                     if (!string.Equals(selectedTheme, originalTheme, StringComparison.OrdinalIgnoreCase))
                     {
                         CustomDialogs.ShowInfo($"Theme changed to {selectedTheme}.", "Launch Manager 2024");
+                    }
+
+                    if (!string.Equals(backupPath, originalBackupPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        CustomDialogs.ShowInfo($"Backup folder changed to:\n{backupPath}", "Launch Manager 2024");
                     }
 
                     DialogResult = DialogResult.OK;
@@ -252,7 +324,7 @@ namespace LaunchManager
             btnCancel = new Button
             {
                 Text = "Cancel",
-                Location = new Point(320, 170),
+                Location = new Point(370, 230),
                 Width = 90
             };
             btnCancel.Click += (s, e) =>
@@ -273,7 +345,7 @@ namespace LaunchManager
                 Anchor = AnchorStyles.Bottom | AnchorStyles.Left
             };
             Controls.Add(lblVersion);
-            
+
             ThemeManager.ApplyTheme(this);
         }
     }
