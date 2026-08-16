@@ -3,6 +3,16 @@
 						########################################################
 
 
+
+#### V. 1.6.0 ####
+
+🔹New: added per-application "NewConsole" management in the exe.xml file through the Add app and Edit app windows.
+
+🔹New: you can now choose whether to include the "NewConsole" node in the exe.xml file for each application, in both LM and MSFS modes, then select either True or False.
+
+🔹Fix: resolved an issue that displayed synchronization or profile-app removal prompts when the simulator’s exe.xml file was missing or its path was not configured.
+
+
 #### V. 1.5.1 ####
 
 🔹Fixed an issue with restoring exe.xml backups that, for some reason, failed to detect the backup files stored in the corresponding folder.

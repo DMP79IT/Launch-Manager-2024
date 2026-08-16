@@ -20,5 +20,7 @@ namespace LaunchManager.Models
         public int CloseWindowDelaySeconds { get; set; } = 0;
         public bool CloseMSFS { get; set; } = false;
         public bool Active { get; set; } = true;
+        public bool IncludeNewConsole { get; set; } = false;
+        public bool NewConsole { get; set; } = false;
     }
 }

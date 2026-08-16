@@ -101,9 +101,17 @@ namespace LaunchManager
                     string profilePath = Path.Combine(Paths.GetProfilesPath(), profileName + ".xml");
 
                     var profileApps = XmlStore.LoadPrograms(profilePath);
+
+                    if (string.IsNullOrWhiteSpace(Paths.ExeXmlPath) ||
+                        !File.Exists(Paths.ExeXmlPath))
+                    {
+                        return;
+                    }
+
                     var exeApps = ParseExeXmlApps(Paths.ExeXmlPath);
 
                     string Normalize(string name) => (name ?? "").Trim();
+
 
                     // 1. Applicazioni presenti in EXE ma non nel PROFILO
                     var extraInExe = exeApps
@@ -292,7 +300,10 @@ namespace LaunchManager
                             AddNode("CommandLine", app.Arguments);
                     }
 
-                    AddNode("NewConsole", "False");
+                    if (app.IncludeNewConsole)
+                    {
+                        AddNode("NewConsole", app.NewConsole ? "True" : "False");
+                    }
 
                     root.AppendChild(add);
                 }
@@ -1106,9 +1117,11 @@ namespace LaunchManager
                             // Se presenti, passa anche gli argomenti della riga di comando
                             if (!string.IsNullOrWhiteSpace(app.Arguments))
                                 AddNode("CommandLine", app.Arguments);
-
-                            // Nodo opzionale, mantenuto per compatibilità con lo schema exe.xml
-                            AddNode("NewConsole", "False");
+                        }
+                        // Nodo opzionale, mantenuto per compatibilità con lo schema exe.xml
+                        if (app.IncludeNewConsole)
+                        {
+                            AddNode("NewConsole", app.NewConsole ? "True" : "False");
                         }
 
                         root.AppendChild(add);
@@ -1752,6 +1765,8 @@ namespace LaunchManager
                     dlg.chkCloseWindow.Checked = app.CloseWindow;
                     dlg.numCloseWindowDelaySeconds.Value = app.CloseWindowDelaySeconds;
                     dlg.chkCloseMSFS.Checked = app.CloseMSFS;
+                    dlg.chkIncludeNewConsole.Checked = app.IncludeNewConsole;
+                    dlg.cmbNewConsole.SelectedItem = app.NewConsole ? "True" : "False";
 
                     if (app.Mode == "LM" || app.Mode == "Launch Manager")
                         dlg.rdoLM.Checked = true;
@@ -1778,6 +1793,8 @@ namespace LaunchManager
                         app.CloseWindow = dlg.CloseWindow;
                         app.CloseWindowDelaySeconds = dlg.CloseWindowDelaySeconds;
                         app.CloseMSFS = dlg.CloseMSFS;
+                        app.IncludeNewConsole = dlg.IncludeNewConsole;
+                        app.NewConsole = dlg.NewConsole;
 
                         // --- Aggiorna la riga visibile ---
                         row.Cells[1].Value = app.Name;
@@ -1904,7 +1921,9 @@ namespace LaunchManager
                             StartMinimizedDelaySeconds = dlg.StartMinimizedDelaySeconds,
                             CloseWindow = dlg.CloseWindow,
                             CloseWindowDelaySeconds = dlg.CloseWindowDelaySeconds,
-                            CloseMSFS = dlg.CloseMSFS
+                            CloseMSFS = dlg.CloseMSFS,
+                            IncludeNewConsole = dlg.IncludeNewConsole,
+                            NewConsole = dlg.NewConsole
                         };
 
                         appIcons[rowIndex] = icon;
