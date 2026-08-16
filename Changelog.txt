@@ -3,6 +3,11 @@
 						########################################################
 
 
+#### V. 1.5.1 ####
+
+🔹Fixed an issue with restoring exe.xml backups that, for some reason, failed to detect the backup files stored in the corresponding folder.
+
+
 #### V. 1.5.0 ####
 
 🔹Added, in the Settings window, the option to set a custom path for exe.xml backups. 

@@ -86,9 +86,16 @@ namespace LaunchManager
 
                 cmbBackups.Items.Clear();
 
-                var files = Directory.GetFiles(backupDir, "exebackup_*.xml")
-                                     .OrderByDescending(f => File.GetLastWriteTime(f))
-                                     .ToList();
+                var files = Directory.GetFiles(backupDir, "*.xml")
+    .Where(f =>
+    {
+        string fileName = Path.GetFileName(f);
+
+        return fileName.StartsWith("exe_backup_", StringComparison.OrdinalIgnoreCase)
+            || fileName.StartsWith("exebackup_", StringComparison.OrdinalIgnoreCase);
+    })
+    .OrderByDescending(f => File.GetLastWriteTime(f))
+    .ToList();
 
                 foreach (var file in files)
                 {
