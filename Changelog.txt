@@ -3,6 +3,10 @@
 						########################################################
 
 
+#### V. 1.6.1 ####
+
+🔹New: Added single-instance detection for Launch Manager 2024. If the application is already running and is launched again, an informational message is displayed:“Launch Manager 2024 is already running.”. The second instance closes automatically, preventing duplicate application windows. The message uses the selected application theme, light or dark.
+
 
 #### V. 1.6.0 ####
 
