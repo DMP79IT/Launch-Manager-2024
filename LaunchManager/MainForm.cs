@@ -1641,24 +1641,58 @@ namespace LaunchManager
 
                 try
                 {
+                    // Recupera l'AppEntry completo memorizzato nella riga della griglia.
+                    // L'ID identifica in modo univoco l'app dentro il profilo XML.
+                    var app = row.Tag as AppEntry;
+
+                    if (app == null || string.IsNullOrWhiteSpace(app.ID))
+                    {
+                        CustomDialogs.ShowError(
+                            "Unable to identify the selected application.",
+                            "Launch Manager 2024"
+                        );
+                        return;
+                    }
+
+                    // LM.exe è il runner che avvia l'app e resta in attesa della chiusura di MSFS.
+                    string lmExePath = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                        "Launch Manager 2024",
+                        "LM.exe"
+                    );
+
+                    if (!File.Exists(lmExePath))
+                    {
+                        CustomDialogs.ShowError(
+                            $"LM.exe was not found:\n{lmExePath}",
+                            "Launch Manager 2024"
+                        );
+                        return;
+                    }
+
+                    // Il flag --manual-launch vale solo per questo avvio manuale.
+                    // Non modifica AppEntry.CloseMSFS e non modifica né salva il profilo XML.
                     var startInfo = new ProcessStartInfo
                     {
-                        FileName = resolvedPath,
-                        Arguments = arguments ?? "",
+                        FileName = lmExePath,
+                        Arguments = $"\"{app.ID}\" --manual-launch",
                         UseShellExecute = true,
-                        WorkingDirectory = Path.GetDirectoryName(resolvedPath)
+                        WorkingDirectory = Path.GetDirectoryName(lmExePath)
                     };
 
                     Process.Start(startInfo);
                 }
                 catch (Exception ex)
                 {
-                    CustomDialogs.ShowError($"Error starting app:\n{ex.Message}", "Launch Manager 2024");
+                    CustomDialogs.ShowError(
+                        $"Error starting app:\n{ex.Message}",
+                        "Launch Manager 2024"
+                    );
                 }
             };
 
-            // Funzione di supporto
-            string ResolveShortcut(string shortcutPath)
+                // Funzione di supporto
+                string ResolveShortcut(string shortcutPath)
             {
                 try
                 {

@@ -22,9 +22,15 @@ namespace LM
 
                 Directory.CreateDirectory(logDir);
                 string logFile = Path.Combine(logDir, "LM_runner.log");
-                File.AppendAllText(logFile, $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}\n");
+
+                File.AppendAllText(
+                    logFile,
+                    $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] {message}\n"
+                );
             }
-            catch { }
+            catch
+            {
+            }
         }
 
         [STAThread]
@@ -36,7 +42,12 @@ namespace LM
         private const int SW_RESTORE = 9;
 
         [DllImport("user32.dll")]
-        private static extern bool PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
+        private static extern bool PostMessage(
+            IntPtr hWnd,
+            uint Msg,
+            IntPtr wParam,
+            IntPtr lParam
+        );
 
         private const uint WM_CLOSE = 0x0010;
 
@@ -48,7 +59,22 @@ namespace LM
 
                 if (args.Length > 0 && Guid.TryParse(args[0], out _))
                 {
-                    RunSingleApp(args[0]);
+                    // Parametro usato solo dall'avvio manuale da MainForm.
+                    // Non viene salvato nel profilo XML.
+                    bool manualLaunch = args.Any(arg =>
+    arg.Equals(
+        "--manual-launch",
+        StringComparison.OrdinalIgnoreCase
+    )
+);
+
+                    bool closeWithMsfsTemporary = manualLaunch;
+
+                    RunSingleApp(
+                        args[0],
+                        closeWithMsfsTemporary,
+                        manualLaunch
+                    );
                 }
                 else
                 {
@@ -61,7 +87,11 @@ namespace LM
             }
         }
 
-        static void RunSingleApp(string appId)
+        static void RunSingleApp(
+    string appId,
+    bool closeWithMsfsTemporary = false,
+    bool manualLaunch = false
+)
         {
             Thread.Sleep(new Random().Next(100, 500));
 
@@ -90,23 +120,52 @@ namespace LM
                 );
 
                 List<AppEntry> apps;
-                using (var fs = new FileStream(profilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+
+                using (var fs = new FileStream(
+                    profilePath,
+                    FileMode.Open,
+                    FileAccess.Read,
+                    FileShare.ReadWrite
+                ))
+                {
                     apps = (List<AppEntry>)serializer.Deserialize(fs);
+                }
 
                 var app = apps.FirstOrDefault(a => a.ID == appId);
+
                 if (app == null)
                 {
                     Log($"[WARN] No app found for ID {appId}");
                     return;
                 }
 
-                if (!app.Active)
+                if (!app.Active && !manualLaunch)
                 {
                     Log($"[INFO] {app.Name} is not active, no action taken.");
                     return;
                 }
 
-                Log($"[STARTUP] LM launching {app.Name} ({app.Path}) - CloseMSFS={app.CloseMSFS}");
+                if (!app.Active && manualLaunch)
+                {
+                    Log(
+                        $"[INFO] {app.Name} is inactive in the profile, " +
+                        "but will be launched manually."
+                    );
+                }
+
+                // Questa variabile esiste soltanto in memoria:
+                // - true se l'opzione è salvata nel profilo;
+                // - oppure true se MainForm ha usato --close-with-msfs.
+                // Non modifica app.CloseMSFS e non modifica il file XML.
+                bool closeWithMsfs =
+                    app.CloseMSFS || closeWithMsfsTemporary;
+
+                Log(
+                    $"[STARTUP] LM launching {app.Name} ({app.Path}) - " +
+                    $"Profile CloseMSFS={app.CloseMSFS}, " +
+                    $"Temporary CloseMSFS={closeWithMsfsTemporary}, " +
+                    $"Effective CloseMSFS={closeWithMsfs}"
+                );
 
                 if (app.DelaySeconds > 0)
                 {
@@ -144,6 +203,7 @@ namespace LM
                         try
                         {
                             int delay = Math.Max(app.StartMinimizedDelaySeconds, 0);
+
                             if (delay > 0)
                             {
                                 Log($"[MINIMIZE] Waiting {delay}s before minimizing {app.Name}");
@@ -151,12 +211,20 @@ namespace LM
                             }
 
                             proc.Refresh();
+
                             if (proc.MainWindowHandle != IntPtr.Zero)
                             {
                                 ShowWindow(proc.MainWindowHandle, SW_MINIMIZE);
-                                Log($"[MINIMIZE] {app.Name} minimized {(delay > 0 ? $"after {delay}s" : "immediately")}");
+
+                                Log(
+                                    $"[MINIMIZE] {app.Name} minimized " +
+                                    $"{(delay > 0 ? $"after {delay}s" : "immediately")}"
+                                );
                             }
-                            else Log($"[MINIMIZE] No main window found for {app.Name}");
+                            else
+                            {
+                                Log($"[MINIMIZE] No main window found for {app.Name}");
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -172,6 +240,7 @@ namespace LM
                         try
                         {
                             int delay = Math.Max(app.CloseWindowDelaySeconds, 0);
+
                             if (delay > 0)
                             {
                                 Log($"[CLOSEWIN] Waiting {delay}s before closing window of {app.Name}");
@@ -179,12 +248,22 @@ namespace LM
                             }
 
                             proc.Refresh();
+
                             if (proc.MainWindowHandle != IntPtr.Zero)
                             {
-                                PostMessage(proc.MainWindowHandle, WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+                                PostMessage(
+                                    proc.MainWindowHandle,
+                                    WM_CLOSE,
+                                    IntPtr.Zero,
+                                    IntPtr.Zero
+                                );
+
                                 Log($"[CLOSEWIN] Simulated click on 'Close' for {app.Name}");
                             }
-                            else Log($"[CLOSEWIN] No main window found for {app.Name}");
+                            else
+                            {
+                                Log($"[CLOSEWIN] No main window found for {app.Name}");
+                            }
                         }
                         catch (Exception ex)
                         {
@@ -197,7 +276,9 @@ namespace LM
 
                 Log("[WAIT] MSFS has exited — final app management...");
 
-                if (app.CloseMSFS)
+                // QUI è l'unica modifica nella logica di chiusura:
+                // prima era: if (app.CloseMSFS)
+                if (closeWithMsfs)
                 {
                     try
                     {
@@ -208,10 +289,21 @@ namespace LM
                             {
                                 try
                                 {
-                                    return p.ProcessName.Equals(exeName, StringComparison.OrdinalIgnoreCase) ||
-                                           string.Equals(p.MainModule.FileName, app.Path, StringComparison.OrdinalIgnoreCase);
+                                    return p.ProcessName.Equals(
+                                               exeName,
+                                               StringComparison.OrdinalIgnoreCase
+                                           )
+                                           ||
+                                           string.Equals(
+                                               p.MainModule.FileName,
+                                               app.Path,
+                                               StringComparison.OrdinalIgnoreCase
+                                           );
                                 }
-                                catch { return false; }
+                                catch
+                                {
+                                    return false;
+                                }
                             })
                             .ToList();
 
@@ -225,15 +317,32 @@ namespace LM
                             {
                                 try
                                 {
-                                    Log($"[FORCE CLOSE] Forcing termination of {p.ProcessName} (PID={p.Id})...");
+                                    Log(
+                                        $"[FORCE CLOSE] Forcing termination of " +
+                                        $"{p.ProcessName} (PID={p.Id})..."
+                                    );
+
                                     p.Kill();
+
                                     if (!p.WaitForExit(3000))
-                                        Log($"[FORCE CLOSE WARN] {app.Name} may have secondary processes still active.");
-                                    Log($"[FORCE CLOSE] {app.Name} successfully terminated.");
+                                    {
+                                        Log(
+                                            $"[FORCE CLOSE WARN] {app.Name} " +
+                                            "may have secondary processes still active."
+                                        );
+                                    }
+
+                                    Log(
+                                        $"[FORCE CLOSE] {app.Name} " +
+                                        "successfully terminated."
+                                    );
                                 }
                                 catch (Exception ex)
                                 {
-                                    Log($"[FORCE CLOSE ERROR] {app.Name}: {ex.Message}");
+                                    Log(
+                                        $"[FORCE CLOSE ERROR] {app.Name}: " +
+                                        ex.Message
+                                    );
                                 }
                             }
                         }
@@ -259,7 +368,14 @@ namespace LM
         static void WaitForSimToClose()
         {
             Log("[WAIT] Waiting for MSFS to close...");
-            string[] simNames = { "FlightSimulator2024", "FlightSimulator", "MSFS", "MicrosoftFlightSimulator" };
+
+            string[] simNames =
+            {
+                "FlightSimulator2024",
+                "FlightSimulator",
+                "MSFS",
+                "MicrosoftFlightSimulator"
+            };
 
             bool simWasRunning = false;
             DateTime lastSeen = DateTime.Now;
@@ -268,18 +384,30 @@ namespace LM
             {
                 var found = simNames.SelectMany(name =>
                 {
-                    try { return Process.GetProcessesByName(name); }
-                    catch { return Array.Empty<Process>(); }
+                    try
+                    {
+                        return Process.GetProcessesByName(name);
+                    }
+                    catch
+                    {
+                        return Array.Empty<Process>();
+                    }
                 }).ToList();
 
                 if (found.Any())
                 {
                     if (!simWasRunning)
+                    {
                         Log($"[WAIT] MSFS detected (PID={found.First().Id})");
+                    }
+
                     simWasRunning = true;
                     lastSeen = DateTime.Now;
                 }
-                else if (simWasRunning && (DateTime.Now - lastSeen).TotalSeconds > 10)
+                else if (
+                    simWasRunning &&
+                    (DateTime.Now - lastSeen).TotalSeconds > 10
+                )
                 {
                     Log("[WAIT] MSFS closed — proceeding with app shutdown...");
                     break;
@@ -320,10 +448,13 @@ namespace LM
                 );
 
                 if (!File.Exists(configPath))
+                {
                     return "Default.xml";
+                }
 
                 var doc = System.Xml.Linq.XDocument.Load(configPath);
-                var elem = doc.Root.Element("ActiveProfile");
+                var elem = doc.Root?.Element("ActiveProfile");
+
                 return elem?.Value ?? "Default.xml";
             }
             catch

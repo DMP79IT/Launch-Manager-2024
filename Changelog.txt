@@ -3,6 +3,25 @@
 						########################################################
 
 
+#### V. 1.6.2 ####
+
+🔹New: Added the ability to manually launch an app even when it is not enabled in the selected profile.
+
+🔹New: Added an option to close manually launched apps when MSFS/FS2024 is closed.
+
+🔹New: App closing is applied only to the individual manual launch session: it does not modify or save any setting in the “Edit app” window.
+
+🔹Fix: Improved detection and closing of configured application instances when FS2024 is closed.
+
+🔹Fix: Added support for handling multiple instances of the same application: Launch Manager can terminate matching instances found at the end of a simulator session.
+
+🔹Improved: Added more detailed log messages for application startup, delays, MSFS detection, MSFS shutdown, and application termination.
+
+🔹Fix: Improved error handling for processes that have already exited or cannot be terminated because of permission restrictions.
+
+🔹Note: Some Windows or Microsoft Store apps may use a process different from the configured executable; in these cases, automatic closing may depend on the app’s internal behavior.
+
+
 #### V. 1.6.1 ####
 
 🔹New: Added single-instance detection for Launch Manager 2024. If the application is already running and is launched again, an informational message is displayed:“Launch Manager 2024 is already running.”. The second instance closes automatically, preventing duplicate application windows. The message uses the selected application theme, light or dark.
@@ -163,3 +182,193 @@
 
 #### V. 1.0.0 ####
 🔹First Release
+
+
+
+
+
+
+						########################################################
+						######## 	🛫 Launch Manager 2024 — Changelog	########
+						########################################################
+
+
+#### V. 1.6.2 ####
+
+🔹Novità: Aggiunta la possibilità di avviare manualmente un'app anche quando non è abilitata nel profilo selezionato.
+
+🔹Novità: Aggiunta un'opzione per chiudere le app avviate manualmente quando MSFS/FS2024 viene chiuso.
+
+🔹Novità: La chiusura dell'app si applica solo alla singola sessione di avvio manuale: non modifica né salva alcuna impostazione nella finestra "Modifica app".
+
+🔹Fix: Migliorati il rilevamento e la chiusura delle istanze dell'applicazione configurate quando FS2024 viene chiuso.
+
+🔹Fix: Aggiunto il supporto per la gestione di istanze multiple della stessa applicazione: Launch Manager può terminare le istanze corrispondenti trovate al termine di una sessione del simulatore.
+
+🔹Miglioramento: Aggiunti messaggi di log più dettagliati per l'avvio dell'applicazione, ritardi, rilevamento di MSFS, chiusura di MSFS e terminazione dell'applicazione.
+
+🔹Fix: Migliorata la gestione degli errori per i processi che sono già terminati o che non possono essere chiusi a causa di restrizioni sui permessi.
+
+🔹Nota: Alcune app di Windows o del Microsoft Store potrebbero utilizzare un processo diverso dall'eseguibile configurato; in questi casi, la chiusura automatica potrebbe dipendere dal comportamento interno dell'app.
+
+
+#### V. 1.6.1 ####
+
+🔹Novità: Aggiunto il rilevamento di un'istanza singola per Launch Manager 2024. Se l'applicazione è già in esecuzione e viene avviata di nuovo, viene visualizzato un messaggio informativo: “Launch Manager 2024 è già in esecuzione.”. La seconda istanza si chiude automaticamente, evitando finestre duplicate dell'applicazione. Il messaggio utilizza il tema selezionato dell'applicazione, chiaro o scuro.
+
+
+#### V. 1.6.0 ####
+
+🔹Novità: Aggiunta la gestione del nodo "NewConsole" per singola applicazione nel file exe.xml tramite le finestre Aggiungi app e Modifica app.
+
+🔹Novità: Ora è possibile scegliere se includere il nodo "NewConsole" nel file exe.xml per ciascuna applicazione, sia in modalità LM che MSFS, selezionando poi True oppure False.
+
+🔹Fix: Risolto un problema per cui venivano mostrati avvisi di sincronizzazione o di rimozione app dal profilo quando il file exe.xml del simulatore era mancante o il suo percorso non era configurato.
+
+
+#### V. 1.5.1 ####
+
+🔹Risolto un problema con il ripristino dei backup di exe.xml che, per qualche motivo, non riusciva a rilevare i file di backup salvati nella cartella corrispondente.
+
+
+#### V. 1.5.0 ####
+
+🔹Aggiunta, nella finestra Impostazioni, l'opzione per impostare un percorso personalizzato per i backup di exe.xml. 
+
+🔹Aggiornati tutti i pulsanti relativi ai backup di exe.xml.
+
+
+#### V. 1.4.3 ####
+
+🔹Risolto: L'app non eliminava i vecchi backup dopo il 6°.
+
+
+#### V. 1.4.2 ####
+
+🔹Modifica: I backup di exe.xml sono ora limitati a un massimo di 5 file. Il 6° elimina automaticamente il più vecchio.
+
+
+#### V. 1.4.1 ####
+
+🔹Migliorato il controllo degli aggiornamenti: Il programma ora verifica automaticamente la presenza di aggiornamenti utilizzando le versioni ufficiali rilasciate, così verrai avvisato in modo più affidabile quando è disponibile una nuova release.
+
+
+#### V. 1.4.0 ####
+
+🎨 Finestre dei messaggi migliorate
+
+🔹Tutte le finestre dei messaggi ora hanno lo stesso stile del programma.
+
+🔧 Finestra Impostazioni migliorata
+
+🔹 Risolto: Non mostra più il messaggio sul percorso di exe.xml ogni volta che si preme "Conferma". Nuovo messaggio solo quando si cambia tema o percorso. Silenzioso se si preme "Conferma" senza modifiche.
+
+
+#### V. 1.3.3 ####
+
+🔹Risolto un problema per cui, in alcuni casi, il popup di notifica dell'aggiornamento non appariva anche se era disponibile una nuova versione del programma.
+
+
+#### V. 1.3.2 ####
+
+🔹Aggiunto: Controllo automatico degli aggiornamenti all'avvio. Launch Manager 2024 ora controlla online se è disponibile una versione più recente e può aprire la pagina di Launch Manager 2024 su Flightsim.to con un solo clic.
+
+
+#### V. 1.3.1 ####
+
+🔹Risolto un problema introdotto nell'ultimo aggiornamento che impediva al profilo attivo di essere caricato automaticamente all'avvio dell'applicazione.
+
+
+#### V. 1.3.0 ####
+
+➡️ Profili ed exe.xml
+
+🔹Il programma controlla automaticamente se il profilo selezionato e il file exe.xml del simulatore contengono le stesse app.
+
+🔹Se trova app presenti solo in exe.xml, propone di aggiungerle al profilo.
+
+🔹Se trova app presenti solo nel profilo, propone opzionalmente di rimuoverle.
+
+
+➡️ Modifica delle app
+
+🔹La finestra “Modifica app” aggiorna immediatamente la griglia e salva il profilo automaticamente dopo ogni conferma.
+
+🔹Che l'editor venga aperto dal pulsante della barra degli strumenti, dal menu contestuale o con un doppio clic su una riga, il comportamento è sempre lo stesso.
+
+
+➡️ Rimozione delle app
+
+🔹Il pulsante “Rimuovi app selezionata” elimina l'app selezionata, aggiorna immediatamente la griglia e salva il profilo automaticamente.
+
+🔹Che l'app venga rimossa dal pulsante della barra degli strumenti o dal menu contestuale, il comportamento è sempre lo stesso.
+
+
+➡️ Miglioramenti generali
+
+🔹Riconoscimento più accurato delle app con lo stesso nome tra il profilo ed exe.xml, anche in presenza di differenze negli spazi o tra maiuscole/minuscole.
+
+🔹Messaggi di avviso e conferma più chiari quando vengono trovate differenze tra il profilo ed exe.xml o quando viene applicato un profilo.
+
+
+➡️ Aggiunta di nuove app tramite drag & drop
+
+🔹Le nuove app aggiunte tramite trascinamento (drag & drop) ora si avviano di default con MSFS.
+
+
+#### V. 1.2.2 ####
+
+🔹Risolto: Il percorso di exe.xml impostato nelle Impostazioni viene ora applicato davvero. Quando si preme "Applica profilo selezionato", il file viene compilato nel nuovo percorso specificato.
+
+
+#### V. 1.2.1 ####
+
+🔹Aggiunto: Ora è possibile aprire il menu contestuale di un'app direttamente facendo clic con il tasto destro sulla sua riga, senza dover prima fare clic con il tasto sinistro.
+
+🔹Aggiunto: Il menu che si apre con il tasto destro corrisponde sempre all'app sotto il cursore, rendendo più veloce e chiaro l'accesso a funzioni come modifica, elimina, ecc.
+
+
+#### V. 1.2.0 ####
+
+🔹Risolto: Il pulsante “Salva configurazione” non sovrascrive più il campo <ActiveProfile> in config.xml, che ora viene aggiornato esclusivamente dall'azione “Applica profilo selezionato” dopo la ricompilazione di exe.xml.
+
+🔹Risolto: Rimossa la salvaguardia del vecchio campo informativo <LastProfile>, evitando incoerenze tra il profilo mostrato e quello effettivamente attivo.
+
+🔹Risolto: All'avvio del programma, il profilo indicato da <ActiveProfile> in config.xml viene ora selezionato e mostrato correttamente nella casella a combinazione (combobox), ovvero il profilo che è stato effettivamente applicato al file exe.xml di MSFS 2024.
+
+
+#### V. 1.1.0 ####
+
+🔹Aggiunto:
+- Supporto completo al tema Chiaro / Scuro in tutta l'applicazione.
+- Caricamento automatico del tema da config.xml all'avvio.
+- Cambio del tema in tempo reale senza riavviare l'applicazione.
+- Controlli dell'interfaccia utente aggiornati per adattarsi correttamente a entrambi i temi (pulsanti, campi di testo, griglia, barra degli strumenti, finestre di dialogo, combobox).
+- Palette di colori migliorata per una migliore leggibilità e un minore affaticamento degli occhi.
+
+🔹Migliorato:
+- Stile coerente per le finestre di dialogo modali e i messaggi di testo.
+- Il testo della barra di stato ora si adatta al tema selezionato.
+- Stile personalizzato della ComboBox per un aspetto corretto in modalità scura.
+
+🔹Risolto:
+- Diverse incoerenze visive tra le finestre che utilizzavano renderer di interfaccia utente diversi.
+- I colori di selezione e dello sfondo della griglia ora si adattano correttamente ai cambi di tema.
+
+
+#### V. 1.0.3 ####
+🔹Aggiunto un nuovo pulsante "Aggiorna cartella profili" sia nella barra degli strumenti che nel menu contestuale, che consente di ricaricare istantaneamente i file di profilo se si aggiungono o duplicano file manualmente, senza riavviare l'applicazione.
+
+
+#### V. 1.0.2 ####
+🔹Risolto il popup di dialogo "Rimuovi profilo": i pulsanti ora appaiono in inglese (Yes/No) anziché in italiano.
+🔹LM_runner.log: il file .log è ora interamente in inglese.
+🔹Correzioni minori.
+
+
+#### V. 1.0.1 ####
+🔹Risolto il popup di conferma “Rimuovi app”: Sì ora rimuove l'app come previsto e No annulla (in precedenza la logica era invertita).
+
+
+#### V. 1.0.0 ####
+🔹Primo Rilascio
