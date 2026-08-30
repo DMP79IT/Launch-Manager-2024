@@ -167,10 +167,21 @@ namespace LM
                     $"Effective CloseMSFS={closeWithMsfs}"
                 );
 
-                if (app.DelaySeconds > 0)
+                if (!manualLaunch && app.DelaySeconds > 0)
                 {
-                    Log($"[DELAY] Waiting {app.DelaySeconds}s before launching {app.Name}");
+                    Log(
+                        $"[DELAY] Waiting {app.DelaySeconds}s " +
+                        $"before launching {app.Name}"
+                    );
+
                     Thread.Sleep(app.DelaySeconds * 1000);
+                }
+                else if (manualLaunch && app.DelaySeconds > 0)
+                {
+                    Log(
+                        $"[DELAY] Manual launch: startup delay " +
+                        $"({app.DelaySeconds}s) bypassed for {app.Name}"
+                    );
                 }
 
                 if (!File.Exists(app.Path))
